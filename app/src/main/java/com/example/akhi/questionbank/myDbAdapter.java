@@ -78,7 +78,7 @@ public class myDbAdapter {
         private static final String TABLE_NAME = "Students";
 
         private static final String UID="_id"; // Column I 
-        private static final String REGNO = "RegNo";
+        private static final String REGNO = "RegNo"; //Column II
         private static final String NAME= "Name";
 
         private static final String CREATE_TABLE = "CREATE TABLE "+TABLE_NAME+
