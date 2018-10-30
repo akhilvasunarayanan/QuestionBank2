@@ -77,7 +77,7 @@ public class myDbAdapter {
     {
         private static final String TABLE_NAME = "Students";
 
-        private static final String UID="_id";
+        private static final String UID="_id"; // Column I (Primary Key)
         private static final String REGNO = "RegNo";
         private static final String NAME= "Name";
 
