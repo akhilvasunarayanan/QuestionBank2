@@ -77,7 +77,7 @@ public class myDbAdapter {
     {
         private static final String TABLE_NAME = "Students";
 
-        private static final String UID="_id"; // Column I 
+        private static final String UID="_id"; // Column I
         private static final String REGNO = "RegNo"; //Column II
         private static final String NAME= "Name";
 
@@ -101,6 +101,7 @@ public class myDbAdapter {
 
             try {
                 db.execSQL(tableSettings.CREATE_TABLE);
+                db.execSQL(tableStudents.CREATE_TABLE);
             } catch (Exception e) {
                 Message.message(context,""+e);
             }
@@ -111,6 +112,7 @@ public class myDbAdapter {
             try {
                 Message.message(context,"OnUpgrade");
                 db.execSQL(tableSettings.DROP_TABLE);
+                db.execSQL(tableStudents.DROP_TABLE);
                 onCreate(db);
             }catch (Exception e) {
                 Message.message(context,""+e);
