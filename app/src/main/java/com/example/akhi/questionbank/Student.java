@@ -7,7 +7,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,6 +19,18 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class Student extends Fragment {
+
+    myDbAdapter helper;
+
+    private ListView listView;
+
+    private SimpleCursorAdapter adapter;
+
+    final String[] from = new String[] { myDbAdapter.tableStudents.UID,
+            myDbAdapter.tableStudents.REGNO, myDbAdapter.tableStudents.NAME };
+
+    final int[] to = new int[] { R.id.id, R.id.title, R.id.desc };
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
