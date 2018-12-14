@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.view.menu.ActionMenuItemView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,6 +25,8 @@ import static android.provider.AlarmClock.EXTRA_MESSAGE;
 public class    MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    ActionMenuItemView mnuAddStudent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +42,8 @@ public class    MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });*/
+
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -80,6 +85,11 @@ public class    MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (id == R.id.mnu_add_student) {
+            Intent add_mem = new Intent(getApplicationContext(), add_record.class);
+            startActivity(add_mem);
+        }
+
         //noinspection SimplifiableIfStatement
 
         return super.onOptionsItemSelected(item);
@@ -92,9 +102,13 @@ public class    MainActivity extends AppCompatActivity
         int id = item.getItemId();
         Fragment fragment = null;
 
+        mnuAddStudent = (ActionMenuItemView) findViewById(R.id.mnu_add_student);
+
         if (id == R.id.nav_student) {
+            mnuAddStudent.setVisibility(View.VISIBLE);
             fragment = new Student();
         } else if(id == R.id.exam_settings) {
+            mnuAddStudent.setVisibility(View.INVISIBLE);
             fragment = new exam_settings();
         }
         if(fragment != null)

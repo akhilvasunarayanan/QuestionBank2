@@ -19,6 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".add_record" />
+        <activity android:name=".modify_record"></activity>
     </application>
 
 </manifest>
