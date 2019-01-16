@@ -6,9 +6,20 @@
     tools:context=".Examination">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <ListView
+        android:id="@+id/examList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:dividerHeight="1dp"
+        android:padding="10dp" >
+    </ListView>
+
+    <TextView
+        android:id="@+id/emptyExam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Student List" />
 
 </FrameLayout>

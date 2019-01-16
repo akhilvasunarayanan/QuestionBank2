@@ -20,7 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".add_record" />
-        <activity android:name=".modify_record"></activity>
+        <activity android:name=".modify_record" />
+        <activity android:name=".exam_edit"></activity>
     </application>
 
 </manifest>

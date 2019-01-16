@@ -26,6 +26,7 @@ public class    MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     ActionMenuItemView mnuAddStudent;
+    Fragment fragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,7 @@ public class    MainActivity extends AppCompatActivity
             }
         });*/
 
-
+        Global.FillAnswerSheetType();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -86,8 +87,13 @@ public class    MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.mnu_add_student) {
-            Intent add_mem = new Intent(getApplicationContext(), add_record.class);
-            startActivity(add_mem);
+            if (fragment == null || fragment instanceof Student) {
+                Intent add_mem = new Intent(getApplicationContext(), add_record.class);
+                startActivity(add_mem);
+            } else if(fragment instanceof Examination){
+                Intent exam_edit = new Intent(getApplicationContext(), exam_edit.class);
+                startActivity(exam_edit);
+            }
         }
 
         //noinspection SimplifiableIfStatement
@@ -100,7 +106,6 @@ public class    MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Fragment fragment = null;
 
         mnuAddStudent = (ActionMenuItemView) findViewById(R.id.mnu_add_student);
 
@@ -110,7 +115,11 @@ public class    MainActivity extends AppCompatActivity
         } else if(id == R.id.exam_settings) {
             mnuAddStudent.setVisibility(View.INVISIBLE);
             fragment = new exam_settings();
+        } else if(id == R.id.nav_examination){
+            mnuAddStudent.setVisibility(View.VISIBLE);
+            fragment = new Examination();
         }
+
         if(fragment != null)
         {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();

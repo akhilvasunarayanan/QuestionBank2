@@ -119,10 +119,34 @@ public class myDbAdapter {
         return cursor;
     }
 
+    static class tableExam
+    {
+        private static final String TABLE_NAME = "Examination";
+
+        public static final String UID="_id";
+        public static final String NAME= "Name";
+        public static final String EXAMDATE= "ExamDate";
+        public static final String ANSWERTYPE= "AnswerTye";
+
+        private static final String CREATE_TABLE = "CREATE TABLE "+TABLE_NAME+
+                " ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ NAME+" VARCHAR(225), " + EXAMDATE + " VARCHAR(12), " + ANSWERTYPE + " INTEGER)";
+        private static final String DROP_TABLE ="DROP TABLE IF EXISTS "+TABLE_NAME;
+    }
+
+    public Cursor GetAllExam() {
+        String[] columns = new String[] { tableExam.UID, tableExam.NAME, tableExam.EXAMDATE };
+        SQLiteDatabase dbb = myhelper.getWritableDatabase();
+        Cursor cursor = dbb.query(tableStudents.TABLE_NAME, columns, null, null, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+        return cursor;
+    }
+
     static class myDbHelper extends SQLiteOpenHelper
     {
         private static final String DATABASE_NAME = "Exam";    // Database Name
-        private static final int DATABASE_Version = 2;    // Database Version
+        private static final int DATABASE_Version = 3;    // Database Version
         private Context context;
 
         public myDbHelper(Context context) {
@@ -135,6 +159,7 @@ public class myDbAdapter {
             try {
                 db.execSQL(tableSettings.CREATE_TABLE);
                 db.execSQL(tableStudents.CREATE_TABLE);
+                db.execSQL(tableExam.CREATE_TABLE);
             } catch (Exception e) {
                 Message.message(context,""+e);
             }
@@ -146,6 +171,7 @@ public class myDbAdapter {
                 Message.message(context,"OnUpgrade");
                 db.execSQL(tableSettings.DROP_TABLE);
                 db.execSQL(tableStudents.DROP_TABLE);
+                db.execSQL(tableExam.DROP_TABLE);
                 onCreate(db);
             }catch (Exception e) {
                 Message.message(context,""+e);
