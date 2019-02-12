@@ -35,7 +35,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textDate" />
 
     <EditText
-        android:id="@+id/editTextName"
+        android:id="@+id/editTextExamName"
         android:layout_width="232dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
@@ -46,18 +46,18 @@
         app:layout_constraintTop_toTopOf="@+id/textName" />
 
     <EditText
-        android:id="@+id/editTextDate"
+        android:id="@+id/editTextExamDate"
         android:layout_width="232dp"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="date"
         app:layout_constraintBottom_toBottomOf="@+id/textDate"
-        app:layout_constraintStart_toStartOf="@+id/editTextName"
+        app:layout_constraintStart_toStartOf="@+id/editTextExamName"
         app:layout_constraintTop_toTopOf="@+id/textDate"
         app:layout_constraintVertical_bias="0.518" />
 
     <Spinner
-        android:id="@+id/spinner"
+        android:id="@+id/spnrAnswerSheetType"
         android:layout_width="190dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"

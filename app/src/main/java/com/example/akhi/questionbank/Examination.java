@@ -1,12 +1,15 @@
 package com.example.akhi.questionbank;
 
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -28,10 +31,9 @@ public class Examination extends Fragment {
 
     private android.support.v4.widget.SimpleCursorAdapter adapter;
 
-    final String[] from = new String[] { myDbAdapter.tableStudents.UID,
-            myDbAdapter.tableStudents.REGNO, myDbAdapter.tableStudents.NAME };
+    final String[] from = new String[] { myDbAdapter.tableExam.UID, myDbAdapter.tableExam.NAME, myDbAdapter.tableExam.EXAMDATE };
 
-    final int[] to = new int[] { R.id.id, R.id.rollno, R.id.name };
+    final int[] to = new int[] { R.id.textViewExamId, R.id.textViewExamName, R.id.textViewExamDate };
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -79,7 +81,13 @@ public class Examination extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_examination, container, false);
+        View view = inflater.inflate(R.layout.fragment_examination, container, false);
+
+        listView = (ListView) view.findViewById(R.id.examList);
+        emptyText = view.findViewById(R.id.emptyExam);
+        fillExams();
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -106,6 +114,13 @@ public class Examination extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void  onResume()
+    {
+        fillExams();
+        super.onResume();
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -119,5 +134,40 @@ public class Examination extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public  void fillExams()
+    {
+        dbManager = new myDbAdapter(this.getContext());
+
+        Cursor cursor = dbManager.GetAllExam();
+
+        //listView.setEmptyView(emptyText);
+
+        //adapter = new android.support.v4.widget.SimpleCursorAdapter(this.getContext(),  R.layout.activity_view_exam, cursor, from, to, 0);
+        //adapter.notifyDataSetChanged();
+
+        //listView.setAdapter(adapter);
+/*
+        // OnCLickListiner For List Items
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long viewId) {
+                TextView idTextView = (TextView) view.findViewById(R.id.id);
+                TextView rollnoTextView = (TextView) view.findViewById(R.id.rollno);
+                TextView nameTextView = (TextView) view.findViewById(R.id.name);
+
+                String id = idTextView.getText().toString();
+                String rollno = rollnoTextView.getText().toString();
+                String name = nameTextView.getText().toString();
+
+                Intent modify_intent = new Intent(getContext(), modify_record.class);
+                modify_intent.putExtra("rollno", rollno);
+                modify_intent.putExtra("name", name);
+                modify_intent.putExtra("id", id);
+
+                startActivity(modify_intent);
+            }
+        });*/
     }
 }

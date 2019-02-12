@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class myDbAdapter {
     myDbHelper myhelper;
     public myDbAdapter(Context context)
@@ -125,11 +129,11 @@ public class myDbAdapter {
 
         public static final String UID="_id";
         public static final String NAME= "Name";
-        public static final String EXAMDATE= "ExamDate";
+        public static final String EXAMDATE= "ExamDate1"; //yyyy-MM-dd HH:mm:SS.SSS
         public static final String ANSWERTYPE= "AnswerTye";
 
         private static final String CREATE_TABLE = "CREATE TABLE "+TABLE_NAME+
-                " ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ NAME+" VARCHAR(225), " + EXAMDATE + " VARCHAR(12), " + ANSWERTYPE + " INTEGER)";
+                " ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ NAME+" VARCHAR(225), " + EXAMDATE + " VARCHAR(21), " + ANSWERTYPE + " INTEGER)";
         private static final String DROP_TABLE ="DROP TABLE IF EXISTS "+TABLE_NAME;
     }
 
@@ -143,10 +147,24 @@ public class myDbAdapter {
         return cursor;
     }
 
+    public long insertExam(String ExamName, Date examDate, int answerSheetType)
+    {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        String strDate = dateFormat.format(examDate);
+
+        SQLiteDatabase dbb = myhelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(tableExam.NAME, ExamName);
+        contentValues.put(tableExam.EXAMDATE, strDate);
+        contentValues.put(tableExam.ANSWERTYPE, answerSheetType);
+        long id = dbb.insert(tableExam.TABLE_NAME, null , contentValues);
+        return id;
+    }
+
     static class myDbHelper extends SQLiteOpenHelper
     {
         private static final String DATABASE_NAME = "Exam";    // Database Name
-        private static final int DATABASE_Version = 3;    // Database Version
+        private static final int DATABASE_Version = 5;    // Database Version
         private Context context;
 
         public myDbHelper(Context context) {
