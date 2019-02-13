@@ -22,7 +22,8 @@
         <activity android:name=".add_record" />
         <activity android:name=".modify_record" />
         <activity android:name=".exam_edit" />
-        <activity android:name=".ViewExam"></activity>
+        <activity android:name=".ViewExam" />
+        <activity android:name=".DisplayExam"></activity>
     </application>
 
 </manifest>

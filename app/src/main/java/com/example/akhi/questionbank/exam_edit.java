@@ -63,11 +63,11 @@ public class exam_edit extends AppCompatActivity implements OnClickListener {
                 try {
                     Date ExamDate = format.parse(ExamDateStr);
                     dbManager.insertExam(ExamName, ExamDate, AnserSheetType);
+                    finish();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
-                finish();
                 break;
         }
     }

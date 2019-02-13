@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -17,7 +18,9 @@ public class myDbAdapter {
         myhelper = new myDbHelper(context);
     }
 
-/*    public int updateName(String oldName , String newName)
+    //region Settings
+
+    /*    public int updateName(String oldName , String newName)
     {
         SQLiteDatabase db = myhelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -77,6 +80,10 @@ public class myDbAdapter {
         return  count;
     }
 
+    //endregion
+
+    //region Students
+
     static class tableStudents
     {
         private static final String TABLE_NAME = "Students";
@@ -123,6 +130,10 @@ public class myDbAdapter {
         return cursor;
     }
 
+    //endregion
+
+    //region Examination
+
     static class tableExam
     {
         private static final String TABLE_NAME = "Examination";
@@ -138,9 +149,9 @@ public class myDbAdapter {
     }
 
     public Cursor GetAllExam() {
-        String[] columns = new String[] { tableExam.UID, tableExam.NAME, tableExam.EXAMDATE };
+        String[] columns = new String[] { tableExam.UID, tableExam.NAME};
         SQLiteDatabase dbb = myhelper.getWritableDatabase();
-        Cursor cursor = dbb.query(tableStudents.TABLE_NAME, columns, null, null, null, null, null);
+        Cursor cursor = dbb.query(tableExam.TABLE_NAME, columns, null, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
         }
@@ -161,10 +172,51 @@ public class myDbAdapter {
         return id;
     }
 
+    public class ExamDetails
+    {
+        public long examId;
+        public String examName;
+        public Date examDate;
+        public int answerSheetType;
+    }
+
+    public ExamDetails GetExamDetails(long examId)
+    {
+        SQLiteDatabase db = myhelper.getWritableDatabase();
+        String[] columns = {tableExam.UID, tableExam.NAME, tableExam.EXAMDATE, tableExam.ANSWERTYPE};
+        String selection = tableExam.UID + " = ?";
+        String[] selectionArgs = new String[]{ Long.toString(examId) };
+        Cursor cursor = db.query(tableExam.TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+        ExamDetails examDetails = new ExamDetails();
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            examDetails.examId = cursor.getLong(cursor.getColumnIndex(tableExam.UID));
+            examDetails.examName = cursor.getString(cursor.getColumnIndex(tableExam.NAME));
+            String ExamDateStr = cursor.getString(cursor.getColumnIndex(tableExam.EXAMDATE));
+
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+            try {
+                examDetails.examDate = format.parse(ExamDateStr);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            examDetails.answerSheetType = cursor.getInt(cursor.getColumnIndex(tableExam.ANSWERTYPE));
+        }
+        cursor.close();
+
+        return examDetails;
+    }
+
+    //endregion
+
+    //region DB Helper
+
     static class myDbHelper extends SQLiteOpenHelper
     {
         private static final String DATABASE_NAME = "Exam";    // Database Name
-        private static final int DATABASE_Version = 5;    // Database Version
+        private static final int DATABASE_Version = 6;    // Database Version
         private Context context;
 
         public myDbHelper(Context context) {
@@ -196,4 +248,6 @@ public class myDbAdapter {
             }
         }
     }
+
+    //endregion
 }

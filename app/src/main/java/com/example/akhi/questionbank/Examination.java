@@ -31,9 +31,9 @@ public class Examination extends Fragment {
 
     private android.support.v4.widget.SimpleCursorAdapter adapter;
 
-    final String[] from = new String[] { myDbAdapter.tableExam.UID, myDbAdapter.tableExam.NAME, myDbAdapter.tableExam.EXAMDATE };
+    final String[] from = new String[] { myDbAdapter.tableExam.UID, myDbAdapter.tableExam.NAME };
 
-    final int[] to = new int[] { R.id.textViewExamId, R.id.textViewExamName, R.id.textViewExamDate };
+    final int[] to = new int[] { R.id.textViewExamId, R.id.textViewExamName };
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -142,32 +142,25 @@ public class Examination extends Fragment {
 
         Cursor cursor = dbManager.GetAllExam();
 
-        //listView.setEmptyView(emptyText);
+        listView.setEmptyView(emptyText);
 
-        //adapter = new android.support.v4.widget.SimpleCursorAdapter(this.getContext(),  R.layout.activity_view_exam, cursor, from, to, 0);
-        //adapter.notifyDataSetChanged();
+        adapter = new android.support.v4.widget.SimpleCursorAdapter(this.getContext(),  R.layout.activity_view_exam, cursor, from, to, 0);
+        adapter.notifyDataSetChanged();
 
-        //listView.setAdapter(adapter);
-/*
+        listView.setAdapter(adapter);
+
         // OnCLickListiner For List Items
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long viewId) {
-                TextView idTextView = (TextView) view.findViewById(R.id.id);
-                TextView rollnoTextView = (TextView) view.findViewById(R.id.rollno);
-                TextView nameTextView = (TextView) view.findViewById(R.id.name);
-
+                TextView idTextView = (TextView) view.findViewById(R.id.textViewExamId);
                 String id = idTextView.getText().toString();
-                String rollno = rollnoTextView.getText().toString();
-                String name = nameTextView.getText().toString();
 
-                Intent modify_intent = new Intent(getContext(), modify_record.class);
-                modify_intent.putExtra("rollno", rollno);
-                modify_intent.putExtra("name", name);
-                modify_intent.putExtra("id", id);
+                Intent modify_intent = new Intent(getContext(), DisplayExam.class);
+                modify_intent.putExtra("ExamId", id);
 
                 startActivity(modify_intent);
             }
-        });*/
+        });
     }
 }
