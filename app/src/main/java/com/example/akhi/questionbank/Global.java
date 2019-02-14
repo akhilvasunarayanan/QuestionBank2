@@ -14,6 +14,19 @@ public class Global {
         answerSheetType.add(new AnswerSheetType("180 Questions", 3, 180));
     }
 
+    public static AnswerSheetType GetAnswerSheet(int Id)
+    {
+        for (AnswerSheetType sheetType : answerSheetType)
+        {
+            if(sheetType.Id == Id)
+            {
+                return sheetType;
+            }
+        }
+
+        return new AnswerSheetType();
+    }
+
     public static class AnswerSheetType {
 
         public String Name;

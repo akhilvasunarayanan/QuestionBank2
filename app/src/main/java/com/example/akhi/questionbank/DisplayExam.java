@@ -36,6 +36,6 @@ public class DisplayExam extends AppCompatActivity {
 
         examName.setText(examDetails.examName);
         examDate.setText(examDetails.examDate.toString());
-        answerSheetType.setText(examDetails.answerSheetType);
+        answerSheetType.setText(Global.GetAnswerSheet(examDetails.answerSheetType).Name);
     }
 }
