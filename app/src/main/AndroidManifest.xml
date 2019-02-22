@@ -23,7 +23,8 @@
         <activity android:name=".modify_record" />
         <activity android:name=".exam_edit" />
         <activity android:name=".ViewExam" />
-        <activity android:name=".DisplayExam"></activity>
+        <activity android:name=".DisplayExam" />
+        <activity android:name=".AnswerKeyEdit"></activity>
     </application>
 
 </manifest>

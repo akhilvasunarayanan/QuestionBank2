@@ -58,7 +58,7 @@
         android:layout_marginTop="8dp"
         android:text="Exam Name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnExDispEdit" />
+        app:layout_constraintTop_toBottomOf="@+id/btnExDispAnswerKey" />
 
     <TextView
         android:id="@+id/textViewExDispName"
@@ -68,7 +68,7 @@
         android:layout_marginTop="8dp"
         android:text="TextView"
         app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toBottomOf="@+id/btnExDispDelete" />
+        app:layout_constraintTop_toBottomOf="@+id/btnExDispAnswerKey" />
 
     <TextView
         android:id="@+id/textView5"
@@ -119,15 +119,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView7" />
 
+    <Button
+        android:id="@+id/btnExDispAnswerKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Answer Key"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnExDispEdit" />
+
     <ListView
         android:id="@+id/ListViewExDispAnswerKey"
         android:layout_width="368dp"
-        android:layout_height="332dp"
-        android:layout_marginBottom="8dp"
+        android:layout_height="276dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView9" />

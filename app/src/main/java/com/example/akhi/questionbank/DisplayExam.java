@@ -35,7 +35,7 @@ public class DisplayExam extends AppCompatActivity {
         myDbAdapter.ExamDetails examDetails = dbManager.GetExamDetails(id);
 
         examName.setText(examDetails.examName);
-        examDate.setText(examDetails.examDate.toString());
+        examDate.setText( android.text.format.DateFormat.format("dd/MMM/yyyy",examDetails.examDate).toString());
         answerSheetType.setText(Global.GetAnswerSheet(examDetails.answerSheetType).Name);
     }
 }
