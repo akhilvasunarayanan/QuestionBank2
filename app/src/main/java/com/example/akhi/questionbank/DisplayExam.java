@@ -3,14 +3,22 @@ package com.example.akhi.questionbank;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class DisplayExam extends AppCompatActivity {
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class DisplayExam extends AppCompatActivity implements View.OnClickListener {
 
     private TextView examName, examDate, answerSheetType;
     private myDbAdapter dbManager;
     private long examId;
+    private Button btnAnswerKey;
+    private int answerSheetId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +31,9 @@ public class DisplayExam extends AppCompatActivity {
         examName = (TextView) findViewById(R.id.textViewExDispName);
         examDate = (TextView) findViewById(R.id.textViewExDispDate);
         answerSheetType = (TextView) findViewById((R.id.textViewExDispAnswerSheetType));
+        btnAnswerKey = (Button) findViewById(R.id.btnExDispAnswerKey);
+
+        btnAnswerKey.setOnClickListener(this);
 
         Intent intent = getIntent();
         String id = intent.getStringExtra("ExamId");
@@ -37,5 +48,18 @@ public class DisplayExam extends AppCompatActivity {
         examName.setText(examDetails.examName);
         examDate.setText( android.text.format.DateFormat.format("dd/MMM/yyyy",examDetails.examDate).toString());
         answerSheetType.setText(Global.GetAnswerSheet(examDetails.answerSheetType).Name);
+        answerSheetId = examDetails.answerSheetType;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btnExDispAnswerKey:
+                Intent intentAnswerKey = new Intent(getApplicationContext(), AnswerKeyEdit.class);
+                intentAnswerKey.putExtra("ExamId", examId);
+                intentAnswerKey.putExtra("AnswerSheetId", examId);
+                startActivity(intentAnswerKey);
+                break;
+        }
     }
 }

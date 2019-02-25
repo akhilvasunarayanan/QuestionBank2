@@ -24,7 +24,8 @@
         <activity android:name=".exam_edit" />
         <activity android:name=".ViewExam" />
         <activity android:name=".DisplayExam" />
-        <activity android:name=".AnswerKeyEdit"></activity>
+        <activity android:name=".AnswerKeyEdit" />
+        <activity android:name=".ViewAnswerKeyEdit"></activity>
     </application>
 
 </manifest>
