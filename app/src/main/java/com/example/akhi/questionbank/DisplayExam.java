@@ -56,8 +56,8 @@ public class DisplayExam extends AppCompatActivity implements View.OnClickListen
         switch (v.getId()) {
             case R.id.btnExDispAnswerKey:
                 Intent intentAnswerKey = new Intent(getApplicationContext(), AnswerKeyEdit.class);
-                intentAnswerKey.putExtra("ExamId", examId);
-                intentAnswerKey.putExtra("AnswerSheetId", examId);
+                intentAnswerKey.putExtra("ExamId", Long.toString(examId));
+                intentAnswerKey.putExtra("AnswerSheetId", Integer.toString(answerSheetId));
                 startActivity(intentAnswerKey);
                 break;
         }

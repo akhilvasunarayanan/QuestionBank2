@@ -9,7 +9,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class myDbAdapter {
     myDbHelper myhelper;
@@ -211,12 +213,86 @@ public class myDbAdapter {
 
     //endregion
 
+    //region Answer Key
+
+    static class tableAnswerKey
+    {
+        private static final String TABLE_NAME = "AnswerKey";
+
+        public static final String UID="_id";
+        public static final String EXAMID= "ExamId";
+        public static final String QUESTIONNO= "QuestionNo";
+        public static final String  OPTION= "Option";
+
+        private static final String CREATE_TABLE = "CREATE TABLE "+TABLE_NAME+
+                " ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ EXAMID +" INTEGER, " + QUESTIONNO + " INTEGER, " + OPTION + " INTEGER)";
+        private static final String DROP_TABLE ="DROP TABLE IF EXISTS "+TABLE_NAME;
+    }
+
+    public class AnswerKey
+    {
+        public int QuestionNo;
+        public int Option;
+
+        public AnswerKey(int questionNo, int option)
+        {
+            this.QuestionNo = questionNo;
+            this.Option = option;
+        }
+    }
+
+    public ArrayList<AnswerKey> GetAnswerKeys(long ExamId)
+    {
+        SQLiteDatabase db = myhelper.getWritableDatabase();
+        String[] columns = {tableAnswerKey.QUESTIONNO, tableAnswerKey.OPTION};
+        String selection = tableAnswerKey.EXAMID + " = ?";
+        String[] selectionArgs = new String[]{Long.toString(ExamId)};
+        Cursor cursor = db.query(tableAnswerKey.TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+
+        ArrayList<AnswerKey> answerKeys = new ArrayList<AnswerKey>();
+
+        if (cursor != null)
+        {
+            if (cursor.moveToFirst())
+            {
+                do {
+
+                } while (cursor.moveToNext());
+            }
+        }
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            cursor.moveToNext();
+            answerKeys.add(new AnswerKey(cursor.getColumnIndex(tableAnswerKey.QUESTIONNO), cursor.getColumnIndex(tableAnswerKey.OPTION)));
+        }
+        cursor.close();
+        return answerKeys;
+    }
+
+    public void InsertAnswerKey(long ExamId, ArrayList<AnswerKey> AnswerKeys)
+    {
+        SQLiteDatabase dbb = myhelper.getWritableDatabase();
+
+        dbb.delete(tableAnswerKey.TABLE_NAME, tableAnswerKey.EXAMID + "=" + ExamId, null);
+
+        for (AnswerKey aKey : AnswerKeys) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(tableAnswerKey.EXAMID, ExamId);
+            contentValues.put(tableAnswerKey.QUESTIONNO, aKey.QuestionNo);
+            contentValues.put(tableAnswerKey.OPTION, aKey.Option);
+            dbb.insert(tableExam.TABLE_NAME, null , contentValues);
+        }
+    }
+
+    //endregion
+
     //region DB Helper
 
     static class myDbHelper extends SQLiteOpenHelper
     {
         private static final String DATABASE_NAME = "Exam";    // Database Name
-        private static final int DATABASE_Version = 6;    // Database Version
+        private static final int DATABASE_Version = 7;    // Database Version
         private Context context;
 
         public myDbHelper(Context context) {
@@ -230,6 +306,7 @@ public class myDbAdapter {
                 db.execSQL(tableSettings.CREATE_TABLE);
                 db.execSQL(tableStudents.CREATE_TABLE);
                 db.execSQL(tableExam.CREATE_TABLE);
+                db.execSQL(tableAnswerKey.CREATE_TABLE);
             } catch (Exception e) {
                 Message.message(context,""+e);
             }
@@ -242,6 +319,7 @@ public class myDbAdapter {
                 db.execSQL(tableSettings.DROP_TABLE);
                 db.execSQL(tableStudents.DROP_TABLE);
                 db.execSQL(tableExam.DROP_TABLE);
+                db.execSQL(tableAnswerKey.DROP_TABLE);
                 onCreate(db);
             }catch (Exception e) {
                 Message.message(context,""+e);
