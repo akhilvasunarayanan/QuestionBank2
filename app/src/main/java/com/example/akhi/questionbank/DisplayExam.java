@@ -17,7 +17,7 @@ public class DisplayExam extends AppCompatActivity implements View.OnClickListen
     private TextView examName, examDate, answerSheetType;
     private myDbAdapter dbManager;
     private long examId;
-    private Button btnAnswerKey;
+    private Button btnAnswerKey, btnEvaluate;
     private int answerSheetId = 0;
 
     @Override
@@ -32,8 +32,10 @@ public class DisplayExam extends AppCompatActivity implements View.OnClickListen
         examDate = (TextView) findViewById(R.id.textViewExDispDate);
         answerSheetType = (TextView) findViewById((R.id.textViewExDispAnswerSheetType));
         btnAnswerKey = (Button) findViewById(R.id.btnExDispAnswerKey);
+        btnEvaluate = (Button) findViewById(R.id.btnExDispEvaluate);
 
         btnAnswerKey.setOnClickListener(this);
+        btnEvaluate.setOnClickListener(this);
 
         Intent intent = getIntent();
         String id = intent.getStringExtra("ExamId");
@@ -59,6 +61,12 @@ public class DisplayExam extends AppCompatActivity implements View.OnClickListen
                 intentAnswerKey.putExtra("ExamId", Long.toString(examId));
                 intentAnswerKey.putExtra("AnswerSheetId", Integer.toString(answerSheetId));
                 startActivity(intentAnswerKey);
+                break;
+            case  R.id.btnExDispEvaluate:
+                Intent intentEvaluate = new Intent(getApplicationContext(), Evaluate.class);
+                intentEvaluate.putExtra("ExamId", Long.toString(examId));
+                intentEvaluate.putExtra("AnswerSheetId", Integer.toString(answerSheetId));
+                startActivity(intentEvaluate);
                 break;
         }
     }

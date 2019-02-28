@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -256,16 +257,11 @@ public class myDbAdapter {
             if (cursor.moveToFirst())
             {
                 do {
-
+                    answerKeys.add(new AnswerKey(cursor.getInt(cursor.getColumnIndex(tableAnswerKey.QUESTIONNO)), cursor.getInt(cursor.getColumnIndex(tableAnswerKey.OPTION))));
                 } while (cursor.moveToNext());
             }
         }
 
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            cursor.moveToNext();
-            answerKeys.add(new AnswerKey(cursor.getColumnIndex(tableAnswerKey.QUESTIONNO), cursor.getColumnIndex(tableAnswerKey.OPTION)));
-        }
         cursor.close();
         return answerKeys;
     }
@@ -281,7 +277,7 @@ public class myDbAdapter {
             contentValues.put(tableAnswerKey.EXAMID, ExamId);
             contentValues.put(tableAnswerKey.QUESTIONNO, aKey.QuestionNo);
             contentValues.put(tableAnswerKey.OPTION, aKey.Option);
-            dbb.insert(tableExam.TABLE_NAME, null , contentValues);
+            dbb.insert(tableAnswerKey.TABLE_NAME, null , contentValues);
         }
     }
 

@@ -19,9 +19,12 @@
     <ListView
         android:id="@+id/listViewAnswerKeyEditKey"
         android:layout_width="335dp"
-        android:layout_height="439dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:fillViewport="true"
+        android:paddingBottom="70dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnAnswerKeyEditSave" />
+
 </android.support.constraint.ConstraintLayout>

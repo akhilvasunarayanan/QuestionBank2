@@ -7,6 +7,7 @@
     tools:context=".ViewAnswerKeyEdit">
 
     <RadioGroup
+        android:id="@+id/radGrpViewAnswerKeyEdit"
         android:layout_width="249dp"
         android:layout_height="33dp"
         android:layout_marginStart="8dp"
@@ -20,36 +21,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:checked="false"
-            android:text="A" />
+            android:text="A"/>
 
         <RadioButton
             android:id="@+id/radViewAnswerKeyEditB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="B" />
+            android:text="B"/>
 
         <RadioButton
             android:id="@+id/radViewAnswerKeyEditC"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="C" />
+            android:text="C"/>
 
         <RadioButton
             android:id="@+id/radViewAnswerKeyEditD"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="D" />
+            android:text="D"/>
 
         <RadioButton
             android:id="@+id/radViewAnswerKeyEditE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="E" />
+            android:text="E"/>
 
     </RadioGroup>
 
@@ -60,6 +60,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="5dp"
         android:text="00."
+        android:focusable="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
