@@ -1,7 +1,9 @@
 package com.example.akhi.questionbank;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.support.v4.graphics.ColorUtils;
 
 public class Class_OMR {
 
@@ -82,6 +84,11 @@ public class Class_OMR {
         public double x;
         public double y;
 
+        public PointD() {
+            this.x = 0;
+            this.y = 0;
+        }
+
         public PointD(double x, double y) {
             this.x = x;
             this.y = y;
@@ -90,6 +97,15 @@ public class Class_OMR {
         public PointD(PointD src) {
             this.x = src.x;
             this.y = src.y;
+        }
+
+        public PointD(Point src) {
+            this.x = (double) src.x;
+            this.y = (double) src.y;
+        }
+
+        public Point ToPoint() {
+            return new Point((int) x, (int) y);
         }
     }
 
@@ -302,7 +318,7 @@ public class Class_OMR {
     public int Get_Ans_Sheet_Questions(int Ans_Sheet_Type, Ans_Sheet_Questions ASQuestions) {
         int Ans_Sheet_Questions_Return = 0;
         if (Ans_Sheet_Type == 1) {
-            Ans_Sheet_Questions_Return = 60
+            Ans_Sheet_Questions_Return = 60;
             Total_Choice = 5;
             Total_Column = 2;
         } else if (Ans_Sheet_Type == 2) {
@@ -779,55 +795,32 @@ public class Class_OMR {
         return rP;
     }
 
-    private class Vertical_Line {
+    private void Get_Vertical_Line_Mid_Ali(PointD _In, PointD Tf, PointD Bf) {
 
-        public double Tfx;
-        public double Tfy;
-        public double Bfx;
-        public double Bfy;
-
-        public Vertical_Line(double _Tfx, double _Tfy, double _Bfx, double _Bfy) {
-            this.Tfx = _Tfx;
-            this.Tfy = _Tfy;
-            this.Bfx = _Bfx;
-            this.Bfy = _Bfy;
-        }
-    }
-
-    private void Get_Vertical_Line_Mid_Ali(double In_x, double In_y, Vertical_Line vLine) {
-
+        PointD In = new PointD(_In);
         double Ll; //Section Formula ' l' at Left
         double Lm; //Section Formula ' m' at Left
 
-        Bottom_Point bPoint = new Bottom_Point((int) vLine.Bfx, (int) vLine.Bfy);
-        Get_Bottom_Point(In_x, bPoint);
-        vLine.Bfx = bPoint.Bx;
-        vLine.Bfy = bPoint.By;
+        Bottom_Point bPoint = new Bottom_Point((int) Bf.x, (int) Bf.y);
+        Bf = new PointD(Get_Bottom_Point(In.x));
+        Bf.x = bPoint.Bx;
+        Bf.y = bPoint.By;
 
-        Ll = vLine.Bfx - BL_x;
-        Lm = BR_x - vLine.Bfx;
+        Ll = Bf.x - BL_x;
+        Lm = BR_x - Bf.x;
 
-        Section_Formula_Para sfPara = new Section_Formula_Para(vLine.Tfx, vLine.Tfy);
-        Section_Formula(TL_x, TL_y, TR_x, TR_y, Ll, Lm, sfPara);
-        vLine.Tfx = sfPara.x;
-        vLine.Tfy = sfPara.y;
+        Tf = Section_Formula(new PointD(TL_x, TL_y), new PointD(TR_x, TR_y), Ll, Lm);
     }
 
-    private class Section_Formula_Para {
+    private PointD Section_Formula(PointD _A, PointD _B, double _l, double _m) {
 
-        double x;
-        double y;
+        PointD rP = new PointD();
+        PointD A = new PointD(_A);
+        PointD B = new PointD(_B);
 
-        public Section_Formula_Para(double _x, double _y) {
-            this.x = _x;
-            this.y = _y;
-        }
-    }
-
-    private void Section_Formula(double x1, double y1, double x2, double y2, double l, double m, Section_Formula_Para para) {
-
-        para.x = ((l * x2) + (m * x1)) / (l + m);
-        para.y = ((l * y2) + (m * y1)) / (l + m);
+        rP.x = ((_l * B.x) + (_m * A.x)) / (_l + _m);
+        rP.y = ((_l * B.y) + (_m * A.y)) / (_l + _m);
+        return rP;
     }
 
     private class Bottom_Point {
@@ -840,7 +833,7 @@ public class Class_OMR {
         }
     }
 
-    private void Get_Bottom_Point(double In_x, Bottom_Point bPoint) {
+    private Point Get_Bottom_Point(double In_x) {
 
         Point Right = new Point(0, 0);
         int Left_x;
@@ -888,10 +881,7 @@ public class Class_OMR {
         Rl = In_x - Left_x;
         Rm = Right.x - In_x;
 
-        Section_Formula_Para sfPara = new Section_Formula_Para(bPoint.Bx, bPoint.By);
-        Section_Formula(Act_Left_x, Act_Left_y, Act_Right.x, Act_Right.y, Rl, Rm, sfPara);
-        bPoint.Bx = (int) sfPara.x;
-        bPoint.By = (int) sfPara.y;
+        return Section_Formula(new PointD(Act_Left_x, Act_Left_y), new PointD(Act_Right), Rl, Rm).ToPoint();
     }
 
     public Point Get_Bottom_Ali_Point_Def(int Point_Num) {
@@ -909,32 +899,18 @@ public class Class_OMR {
         return rP;
     }
 
-    public Point Get_Point(double In_x, double In_y) {
+    public Point Get_Point(PointD _In) {
 
-        double Tfx = 0;
-        double Tfy = 0;
-        double Bfx = 0;
-        double Bfy = 0;
-        double Lfx = 0;
-        double Lfy = 0;
-        double Rfx = 0;
-        double Rfy = 0;
+        PointD In = new PointD(_In);
+        PointD Tf = new PointD();
+        PointD Bf = new PointD();
+        PointD Lf = new PointD();
+        PointD Rf = new PointD();
 
-        Vertical_Line vLine = new Vertical_Line(Tfx, Tfy, Bfx, Bfy);
-        Get_Vertical_Line(In_x, In_y, vLine);
-        Tfx = vLine.Tfx;
-        Tfy = vLine.Tfy;
-        Bfx = vLine.Bfx;
-        Bfy = vLine.Bfy;
+        Get_Vertical_Line(In, Tf, Bf);
+        Get_Horizontal_Line(In, Lf, Rf);
 
-        Horizontal_Line hLine = new Horizontal_Line(Lfx, Lfy, Rfx, Rfy);
-        Get_Horizontal_Line(In_x, In_y, hLine);
-        Lfx = hLine.Lfx;
-        Lfy = hLine.Lfy;
-        Rfx = hLine.Rfx;
-        Rfy = hLine.Rfy;
-
-        return Get_Intersection_Of_Two_Line_A_And_B((int) Lfx, (int) Lfy, (int) Rfx, (int) Rfy, (int) Bfx, (int) Bfy, (int) Tfx, (int) Tfy);
+        return Get_Intersection_Of_Two_Line_A_And_B(new Point(Lf.ToPoint()), new Point(Rf.ToPoint()), new Point(Bf.ToPoint()), new Point(Tf.ToPoint()));
     }
 
     private class Horizontal_Line {
@@ -952,69 +928,61 @@ public class Class_OMR {
         }
     }
 
-    private void Get_Horizontal_Line(double In_x, double In_y, Horizontal_Line hLine) {
+    private void Get_Horizontal_Line(PointD _In, PointD Lf, PointD Rf) {
 
+        PointD In = new PointD(_In);
         double Ll; //Section Formula 'l' at Left
         double Lm; //Section Formula 'm' at Left
         double Rl; //Section Formula 'l' at Right
         double Rm; //Section Formula 'm' at Right
 
-        Ll = In_y;
-        Lm = Def_BL_y - Def_TL_y - In_y;
+        Ll = In.y;
+        Lm = Def_BL_y - Def_TL_y - In.y;
 
-        Rl = In_y;
+        Rl = In.y;
         Rm = Def_BR_y - Def_TR_y - Rl;
 
-        Section_Formula_Para sfParaL = new Section_Formula_Para(hLine.Lfx, hLine.Lfy);
-        Section_Formula(BL_x, BL_y, TL_x, TL_y, Ll, Lm, sfParaL);
-        hLine.Lfx = sfParaL.x;
-        hLine.Lfy = sfParaL.y;
-
-        Section_Formula_Para sfParaR = new Section_Formula_Para(hLine.Rfx, hLine.Rfy);
-        Section_Formula(BR_x, BR_y, TR_x, TR_y, Rl, Rm, sfParaR);
-        hLine.Rfx = sfParaR.x;
-        hLine.Rfy = sfParaR.y;
+        Lf = Section_Formula(new PointD(BL_x, BL_y), new PointD(TL_x, TL_y), Ll, Lm);
+        Rf = Section_Formula(new PointD(BR_x, BR_y), new PointD(TR_x, TR_y), Rl, Rm);
     }
 
-    private void Get_Vertical_Line(double In_x, double In_y, Vertical_Line vLine) {
+    private void Get_Vertical_Line(PointD _In, PointD Tf, PointD Bf) {
 
+        PointD In = new PointD(_In);
         double Tl; //Section Formula ' l ' at Top
         double Tm; //Section Formula ' m ' at Top
         double Bl; //Section Formula ' l ' at Bottom
         double Bm; //Section Formula ' m ' at Bottom
 
-        Tl = In_x;
-        Tm = Def_TR_x - Def_TL_x - In_x;
+        Tl = In.x;
+        Tm = Def_TR_x - Def_TL_x - In.x;
 
-        Bl = In_x;
-        Bm = Def_BR_x - Def_BL_x - In_x;
+        Bl = In.x;
+        Bm = Def_BR_x - Def_BL_x - In.x;
 
-        Section_Formula_Para sfParaT = new Section_Formula_Para(vLine.Tfx, vLine.Tfy);
-        Section_Formula(TL_x, TL_y, TR_x, TR_y, Tl, Tm, sfParaT);
-        vLine.Tfx = sfParaT.x;
-        vLine.Tfy = sfParaT.y;
-
-        Section_Formula_Para sfParaB = new Section_Formula_Para(vLine.Bfx, vLine.Bfy);
-        Section_Formula(BL_x, BL_y, BR_x, BR_y, Bl, Bm, sfParaB);
-        vLine.Bfx = sfParaB.x;
-        vLine.Bfy = sfParaB.y;
+        Tf = Section_Formula(new PointD(TL_x, TL_y), new PointD(TR_x, TR_y), Tl, Tm);
+        Bf = Section_Formula(new PointD(BL_x, BL_y), new PointD(BR_x, BR_y), Bl, Bm);
     }
 
-    public Point Get_Intersection_Of_Two_Line_A_And_B(int Ax1, int Ay1, int Ax2, int Ay2, int Bx1, int By1, int Bx2, int By2) {
+    public Point Get_Intersection_Of_Two_Line_A_And_B(Point _A1, Point _A2, Point _B1, Point _B2) {
 
+        Point A1 = new Point(_A1);
+        Point A2 = new Point(_A2);
+        Point B1 = new Point(_B1);
+        Point B2 = new Point(_B2);
         Point iP = new Point(0, 0);
         double PartA;
         double PartB;
         double PartC;
 
-        if (Ax1 == Ax2) {
-            iP.x = Ax1;
-        } else if (Bx1 == Bx2) {
-            iP.x = Bx1;
+        if (A1.x == A2.x) {
+            iP.x = A1.x;
+        } else if (B1.x == B2.x) {
+            iP.x = B1.x;
         } else {
-            PartA = ((Ay1 - Ay2) / (Ax1 - Ax2)) - ((By1 - By2) / (Bx1 - Bx2));
-            PartB = ((Bx1 * By2) - (Bx2 * By1)) / (Bx1 - Bx2);
-            PartC = ((Ax1 * Ay2) - (Ax2 * Ay1)) / (Ax1 - Ax2);
+            PartA = ((A1.y - A2.y) / (A1.x - A2.x)) - ((B1.y - B2.y) / (B1.x - B2.x));
+            PartB = ((B1.x * B2.y) - (B2.x * B1.y)) / (B1.x - B2.x);
+            PartC = ((A1.x * A2.y) - (A2.x * A1.y)) / (A1.x - A2.x);
 
             try {
                 iP.x = (int) ((PartB - PartC) / PartA);
@@ -1023,15 +991,15 @@ public class Class_OMR {
             }
         }
 
-        if (By1 == By2) {
-            iP.y = By1;
-        } else if (Ay1 == Ay2) {
-            iP.y = Ay1;
+        if (B1.y == B2.y) {
+            iP.y = B1.y;
+        } else if (A1.y == A2.y) {
+            iP.y = A1.y;
         } else {
 
-            PartA = ((Ax1 - Ax2) / (Ay1 - Ay2)) - ((Bx1 - Bx2) / (By1 - By2));
-            PartB = ((By1 * Bx2) - (By2 * Bx1)) / (By1 - By2);
-            PartC = ((Ay1 * Ax2) - (Ay2 * Ax1)) / (Ay1 - Ay2);
+            PartA = ((A1.x - A2.x) / (A1.y - A2.y)) - ((B1.x - B2.x) / (B1.y - B2.y));
+            PartB = ((B1.y * B2.x) - (B2.y * B1.x)) / (B1.y - B2.y);
+            PartC = ((A1.y * A2.x) - (A2.y * A1.x)) / (A1.y - A2.y);
 
             try {
                 iP.y = (int) ((PartB - PartC) / PartA);
@@ -1063,12 +1031,12 @@ public class Class_OMR {
 
         for (i = 1; i <= Right_Ali_Points_Cnt; i++) {
             Right_Ali[i] = Get_Right_Ali_Point_Def(i);
-            Right_Ali[i] = Get_Point(Right_Ali[i].x, Right_Ali[i].y);
+            Right_Ali[i] = Get_Point(new PointD(Right_Ali[i]));
         }
 
         for (i = 1; i <= Bottom_Ali_Points_Cnt; i++) {
             Bottom_Ali[i] = Get_Bottom_Ali_Point_Def(i);
-            Bottom_Ali[i] = Get_Point(Bottom_Ali[i].x, Bottom_Ali[i].y);
+            Bottom_Ali[i] = Get_Point(new PointD(Bottom_Ali[i]));
         }
 
         Calculate_Side_Length_And_Ratio();
@@ -1119,150 +1087,165 @@ public class Class_OMR {
 
     public PointD Get_Point_Mid_Ali(PointD In) {
 
-        PointD Out = new PointD(0, 0);
-        PointD Tf = new PointD(0,0);
-        PointD Bf = new PointD(0,0);
-        Dim Lfx As Double
-        Dim Lfy As Double
-        Dim Rfx As Double
-        Dim Rfy As Double
+        PointD Tf = new PointD(0, 0);
+        PointD Bf = new PointD(0, 0);
+        PointD Lf = new PointD(0, 0);
+        PointD Rf = new PointD(0, 0);
 
-        Call Get_Vertical_Line_Mid_Ali (In_x, In_y, Tfx, Tfy, Bfx, Bfy)
-        Call Get_Horizontal_Line_Mid_Ali (In_x, In_y, Lfx, Lfy, Rfx, Rfy)
+        Get_Vertical_Line_Mid_Ali(In, Tf, Bf);
+        Get_Horizontal_Line_Mid_Ali(In, Lf, Rf);
 
-        Call Get_Intersection_Of_Two_Line_A_And_B
-        (Lfx, Lfy, Rfx, Rfy, Bfx, Bfy, Tfx, Tfy, Out_x, Out_y)
+        Point Out = Get_Intersection_Of_Two_Line_A_And_B(new Point(Lf.ToPoint()), new Point(Rf.ToPoint()), new Point(Bf.ToPoint()), new Point(Tf.ToPoint()));
 
-        End Sub
-
-        Private Sub Get_Horizontal_Line_Mid_Ali(ByVal In_x As Double, _
-                ByVal In_y As Double, _
-                ByRef Lfx As Double, _
-                ByRef Lfy As Double, _
-                ByRef Rfx As Double, _
-                ByRef Rfy As Double)
-
-        Dim Ll As Double 'Section Formula ' l ' at Left
-        Dim Lm As Double 'Section Formula ' m ' at Left
-
-        Call Get_Right_Point (In_y, Rfx, Rfy)
-
-        Ll = Rfy - BR_y
-        Lm = TR_y - Rfy
-
-        Call Section_Formula (BL_x, BL_y, TL_x, TL_y, Ll, Lm, Lfx, Lfy)
-
+        return new PointD(Out);
     }
 
+    private void Get_Horizontal_Line_Mid_Ali(PointD _In, PointD Lf, PointD Rf) {
 
+        PointD In = new PointD(_In);
+        double Ll; //Section Formula ' l ' at Left
+        double Lm; //Section Formula ' m ' at Left
 
+        Rf = new PointD(Get_Right_Point(In.y));
 
+        Ll = Rf.y - BR_y;
+        Lm = TR_y - Rf.y;
 
+        Lf = Section_Formula(new PointD(BL_x, BL_y), new PointD(TL_x, TL_y), Ll, Lm);
+    }
 
+    private Point Get_Right_Point(double In_y) {
 
-    Private Sub Get_Right_Point(ByVal In_y As Double, _
-            ByRef Rx As Integer, _
-                                        ByRef Ry As Integer)
+        Point Top = new Point(0, 0);
+        Point Bottom = new Point(0, 0);
+        int i;
+        boolean Find_Ok;
+        double Rl; //Section Formula 'l' at Right
+        double Rm; //Section Formula 'm' at Right
+        Point Act_Top = new Point(0, 0);
+        Point Act_Bottom = new Point(0, 0);
 
-    Dim Top_x As Integer
-    Dim Top_y As Integer
-    Dim Bottom_x As Integer
-    Dim Bottom_y As Integer
-    Dim i As Integer
-    Dim Find_Ok As Boolean
-    Dim Rl As Double 'Section Formula 'l' at Right
-    Dim Rm As Double 'Section Formula 'm' at Right
-    Dim Act_Top_x As Integer
-    Dim Act_Top_y As Integer
-    Dim Act_Bottom_x As Integer
-    Dim Act_Bottom_y As Integer
+        Bottom.x = (int) (Def_BR_x - Def_BL_x);
+        Bottom.y = 0;
+        Act_Bottom.x = (int) BR_x;
+        Act_Bottom.y = (int) BR_y;
+        Find_Ok = false;
 
-    Bottom_x = Def_BR_x - Def_BL_x
-            Bottom_y = 0
-    Act_Bottom_x = BR_x
-            Act_Bottom_y = BR_y
-    Find_Ok = False
+        for (i = 1; i <= Right_Ali_Points_Cnt; i++) {
 
-    For i = 1 To Right_Ali_Points_Cnt
+            Top = Get_Right_Ali_Point_Def(i);
+            Act_Top.x = Right_Ali[i].x;
+            Act_Top.y = Right_Ali[i].y;
 
-    Call Get_Right_Ali_Point_Def(i, Top_x, Top_y)
+            if (Bottom.y <= In_y && In_y < Top.y) {
+                Find_Ok = true;
+                break;
+            }
 
-    Act_Top_x = Right_Ali_x(i)
-    Act_Top_y = Right_Ali_y(i)
+            Bottom.x = Top.x;
+            Bottom.y = Top.y;
+            Act_Bottom.x = Act_Top.x;
+            Act_Bottom.y = Act_Top.y;
+        }
 
-    If Bottom_y <= In_y And In_y < Top_y Then
-    Find_Ok = True
-    Exit For
-    End If
+        if (!Find_Ok) {
+            Top.x = (int) (Def_TR_x - Def_TL_x);
+            Top.y = (int) (Def_BR_y - Def_TR_y);
+            Act_Top.x = (int) TR_x;
+            Act_Top.y = (int) TR_y;
+        }
 
-    Bottom_x = Top_x
-            Bottom_y = Top_y
+        Rl = In_y - Bottom.y;
+        Rm = Top.y - In_y;
 
-    Act_Bottom_x = Act_Top_x
-            Act_Bottom_y = Act_Top_y
+        return Section_Formula(new PointD(Act_Bottom), new PointD(Act_Top), Rl, Rm).ToPoint();
+    }
 
-    Next
+    public double Get_RollNo_Mark_Brightness(Bitmap BmOmr, int Digit_Cnt, int Digit_Place) {
 
-    If Find_Ok = False Then
-            Top_x = Def_TR_x - Def_TL_x
-    Top_y = Def_BR_y - Def_TR_y
-            Act_Top_x = TR_x
-    Act_Top_y = TR_y
-    End If
+        Point Bubble = new Point(0, 0);
 
-    Rl = In_y - Bottom_y
-            Rm = Top_y - In_y
+        Bubble = Get_RollNumber_Bubble(Digit_Cnt, Digit_Place);
 
-    Call Section_Formula(Act_Bottom_x, Act_Bottom_y, Act_Top_x, Act_Top_y, Rl, Rm, Rx, Ry)
+        return Get_Bubble_Mark_Brightness(BmOmr, Bubble);
+    }
 
-    End Sub
+    public Point Get_RollNumber_Bubble(int Digit_Cnt, int Digit_Place) {
 
+        Point Bubble = new Point(0, 0);
+        Point B = new Point(0, 0);
 
+        if (Digit_Cnt > 10 || Digit_Place > 5) return null;
 
+        B.x = Bubble_RollNo_Offset_x + Digit_Place * Bubble_Hori_Space;
 
+        if (Digit_Cnt > 30) {
+            B.x += 180;
+            B.y = Bubble_RollNo_Offset_y - ((Digit_Cnt - 31) * Bubble_Vert_Space);
+        } else {
+            B.y = Bubble_RollNo_Offset_y - ((Digit_Cnt - 1) * Bubble_Vert_Space);
+        }
 
+        Bubble = Get_Point_Mid_Ali(new PointD(B)).ToPoint(); //Call Get_Point(Bx, By, Bubble_x, Bubble_y)
+        return Bubble;
+    }
 
+    public double Get_Bubble_Mark_Brightness(Bitmap BmOmr, Point Bubble) {
 
-    Public Function Get_RollNo_Mark_Brightness(ByRef BmOmr As Bitmap, _
-            ByVal Digit_Cnt As Integer, _
-                                                       ByVal Digit_Place As SByte) As Double
+        int x;
+        int y;
+        int Omr_Bubble_Height;
+        int Omr_Bubble_Width;
+        double Tot_Bri;
+        int Tot_Cnt;
 
-    Dim Bubble_x As Integer
-    Dim Bubble_y As Integer
+        Omr_Bubble_Width = (int) java.lang.Math.round(Bubble_Width * XRatio);
+        Omr_Bubble_Height = (int) java.lang.Math.round(Bubble_Height * YRatio);
 
-    Call Get_RollNumber_Bubble(Digit_Cnt, Digit_Place, Bubble_x, Bubble_y)
+        Tot_Bri = 0;
+        Tot_Cnt = 0;
 
-    Get_RollNo_Mark_Brightness = Get_Bubble_Mark_Brightness(BmOmr, Bubble_x, Bubble_y)
+        for (x = Bubble.x - (Omr_Bubble_Width / 2); x <= Bubble.x + (Omr_Bubble_Width / 2); x++) {
+            for (y = Bubble.y - (Omr_Bubble_Height / 2); y <= Bubble.y + (Omr_Bubble_Height / 2); y++) {
+                Tot_Bri += GetBrightness(BmOmr.getPixel(x, y));
+                Tot_Cnt += 1;
+            }
+        }
 
-    End Function
+        return (Tot_Bri / Tot_Cnt);
+    }
 
-    Public Sub Get_Bubble(ByVal Qu_Num As Integer, _
-            ByVal Choice As SByte, _
-                                  ByVal Total_Column As SByte, _
-                                  ByRef Bubble_x As Integer, _
-                                  ByRef Bubble_y As Integer)
+    private double GetBrightness(int color) {
 
-    Dim Bx As Double
-    Dim By As Double
-    Dim ColumnIndex As Integer
-    Dim By_Num As Integer
+        float[] hsl = new float[3];
+        ColorUtils.colorToHSL(color, hsl);
+        return (double) hsl[2];
+    }
 
-    If Qu_Num > Total_Qu Or Choice > 5 Then MsgBox("Error", MsgBoxStyle.Critical)
+    public Point Get_Bubble(int Qu_Num, int Choice, int Total_Column) {
 
-    Bx = Bubble_Offset_x + Choice * Bubble_Hori_Space
+        Point Bubble = new Point(0, 0);
+        PointD B = new PointD();
+        int ColumnIndex;
+        int By_Num;
 
-            ColumnIndex = Int((Qu_Num - 1) / (Total_Qu / Total_Column))
+        if (Qu_Num > Total_Qu || Choice > 5) return null;
 
-    Bx = Bx + (Bubble_Col_Offset * ColumnIndex)
+        B.x = Bubble_Offset_x + Choice * Bubble_Hori_Space;
 
-    By_Num = Qu_Num - (ColumnIndex * (Total_Qu / Total_Column))
+        ColumnIndex = (int) ((Qu_Num - 1) / (Total_Qu / Total_Column)); //Take Integer part
 
-    By = Bubble_Offset_y - ((By_Num - 1) * Bubble_Vert_Space)
+        B.x = B.x + (Bubble_Col_Offset * ColumnIndex);
+        By_Num = Qu_Num - (ColumnIndex * (Total_Qu / Total_Column));
+        B.y = Bubble_Offset_y - ((By_Num - 1) * Bubble_Vert_Space);
 
-            'Call Get_Point(Bx, By, Bubble_x, Bubble_y)
-    Call Get_Point_Mid_Ali(Bx, By, Bubble_x, Bubble_y)
+        //Call Get_Point(Bx, By, Bubble_x, Bubble_y)
+        Get_Point_Mid_Ali(B.x, B.y, Bubble_x, Bubble_y)
 
-    End Sub
+                use round insted of casting
+
+        return Bubble;
+    }
 
     Public Function Get_Ans_Bubble_Mark_Brightness(ByRef BmOmr As Bitmap, _
             ByVal Qu_Num As Integer, _
@@ -1276,33 +1259,7 @@ public class Class_OMR {
 
     End Function
 
-    Public Function Get_Bubble_Mark_Brightness(ByRef BmOmr As Bitmap, _
-            ByVal Bubble_x As Integer, _
-                                                       ByVal Bubble_y As Integer) As Double
 
-    Dim x As Integer
-    Dim y As Integer
-    Dim Omr_Bubble_Height As Integer
-    Dim Omr_Bubble_Width As Integer
-    Dim Tot_Bri As Double
-    Dim Tot_Cnt As Integer
-
-    Omr_Bubble_Width = Math.Round(Bubble_Width * XRatio)
-    Omr_Bubble_Height = Math.Round(Bubble_Height * YRatio)
-
-    Tot_Bri = 0
-    Tot_Cnt = 0
-
-    For x = Bubble_x - (Omr_Bubble_Width / 2) To Bubble_x + (Omr_Bubble_Width / 2)
-    For y = Bubble_y - (Omr_Bubble_Height / 2) To Bubble_y + (Omr_Bubble_Height / 2)
-    Tot_Bri += BmOmr.GetPixel(x, y).GetBrightness
-    Tot_Cnt += 1
-    Next
-            Next
-
-    Get_Bubble_Mark_Brightness = Tot_Bri / Tot_Cnt
-
-    End Function
 
     Public Function Get_Ali_Rotation_Mark(ByRef BmOmr As Bitmap, _
             ByVal Ax As Integer, _
@@ -1354,29 +1311,7 @@ public class Class_OMR {
 
     End Function
 
-    Public Sub Get_RollNumber_Bubble(ByVal Digit_Cnt As Integer, _
-            ByVal Digit_Place As SByte, _
-                                             ByRef Bubble_x As Integer, _
-                                             ByRef Bubble_y As Integer)
 
-    Dim Bx As Double
-    Dim By As Double
-
-    If Digit_Cnt > 10 Or Digit_Place > 5 Then MsgBox("Error", MsgBoxStyle.Critical)
-
-    Bx = Bubble_RollNo_Offset_x + Digit_Place * Bubble_Hori_Space
-
-    If Digit_Cnt > 30 Then
-    Bx += 180
-    By = Bubble_RollNo_Offset_y - ((Digit_Cnt - 31) * Bubble_Vert_Space)
-    Else
-            By = Bubble_RollNo_Offset_y - ((Digit_Cnt - 1) * Bubble_Vert_Space)
-    End If
-
-    Call Get_Point_Mid_Ali(Bx, By, Bubble_x, Bubble_y)
-        'Call Get_Point(Bx, By, Bubble_x, Bubble_y)
-
-    End Sub
 
     Public Function Alignment_Detect(ByRef BmOmr As Bitmap, _
             ByRef Ali_x() As Integer, _
