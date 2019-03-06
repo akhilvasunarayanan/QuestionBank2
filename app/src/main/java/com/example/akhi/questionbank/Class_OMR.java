@@ -105,7 +105,7 @@ public class Class_OMR {
         }
 
         public Point ToPoint() {
-            return new Point((int) x, (int) y);
+            return new Point((int) java.lang.Math.round(x), (int) java.lang.Math.round(y));
         }
     }
 
@@ -741,26 +741,26 @@ public class Class_OMR {
 
         //Top Left Allignment Area
         AMArea.Left_x[1] = 0;
-        AMArea.Right_x[1] = (int) (X_Ratio * (Def_TL_x + 93));
+        AMArea.Right_x[1] = (int) java.lang.Math.round(X_Ratio * (Def_TL_x + 93));
         AMArea.Top_y[1] = 0;
-        AMArea.Bottom_y[1] = (int) (Y_Ratio * (Def_TL_y + 93));
+        AMArea.Bottom_y[1] = (int) java.lang.Math.round(Y_Ratio * (Def_TL_y + 93));
 
         //Top Right Allignment Area
-        AMArea.Left_x[2] = (int) (X_Ratio * (Def_TR_x - 93));
+        AMArea.Left_x[2] = (int) java.lang.Math.round(X_Ratio * (Def_TR_x - 93));
         AMArea.Right_x[2] = Sheet_Width;
         AMArea.Top_y[2] = 0;
-        AMArea.Bottom_y[2] = (int) (Y_Ratio * (Def_TR_y + 93));
+        AMArea.Bottom_y[2] = (int) java.lang.Math.round(Y_Ratio * (Def_TR_y + 93));
 
         //Bottom Right Allignment Area
-        AMArea.Left_x[3] = (int) (X_Ratio * (Def_BR_x - 93));
+        AMArea.Left_x[3] = (int) java.lang.Math.round(X_Ratio * (Def_BR_x - 93));
         AMArea.Right_x[3] = Sheet_Width;
-        AMArea.Top_y[3] = (int) (Y_Ratio * (Def_BR_y - 93));
+        AMArea.Top_y[3] = (int) java.lang.Math.round(Y_Ratio * (Def_BR_y - 93));
         AMArea.Bottom_y[3] = Sheet_Hight;
 
         //Bottom Left Allignment Area
         AMArea.Left_x[4] = 0;
-        AMArea.Right_x[4] = (int) (X_Ratio * (Def_BL_x + 93));
-        AMArea.Top_y[4] = (int) (Y_Ratio * (Def_BL_y - 93));
+        AMArea.Right_x[4] = (int) java.lang.Math.round(X_Ratio * (Def_BL_x + 93));
+        AMArea.Top_y[4] = (int) java.lang.Math.round(Y_Ratio * (Def_BL_y - 93));
         AMArea.Bottom_y[4] = Sheet_Hight;
 
         for (i = 0; i <= 4; i++) {
@@ -770,14 +770,14 @@ public class Class_OMR {
             if (AMArea.Bottom_y[i] > Sheet_Hight) AMArea.Bottom_y[i] = Sheet_Hight;
         }
 
-        AMArea.Ali_Blank_Space_X = (int) (X_Ratio * Squ_Blank_Space_x);
-        AMArea.Ali_Blank_Space_Y = (int) (Y_Ratio * Squ_Blank_Space_y);
+        AMArea.Ali_Blank_Space_X = (int) java.lang.Math.round(X_Ratio * Squ_Blank_Space_x);
+        AMArea.Ali_Blank_Space_Y = (int) java.lang.Math.round(Y_Ratio * Squ_Blank_Space_y);
 
-        AMArea.Ali_Squ_Thick_Max_X = (int) (X_Ratio * Squ_Thick * Squ_Thick_Max / 100);
-        AMArea.Ali_Squ_Thick_Max_Y = (int) (Y_Ratio * Squ_Thick * Squ_Thick_Max / 100);
+        AMArea.Ali_Squ_Thick_Max_X = (int) java.lang.Math.round(X_Ratio * Squ_Thick * Squ_Thick_Max / 100);
+        AMArea.Ali_Squ_Thick_Max_Y = (int) java.lang.Math.round(Y_Ratio * Squ_Thick * Squ_Thick_Max / 100);
 
-        AMArea.Ali_Squ_Thick_Min_X = (int) (X_Ratio * Squ_Thick * Squ_Thick_Min / 100);
-        AMArea.Ali_Squ_Thick_Min_Y = (int) (Y_Ratio * Squ_Thick * Squ_Thick_Min / 100);
+        AMArea.Ali_Squ_Thick_Min_X = (int) java.lang.Math.round(X_Ratio * Squ_Thick * Squ_Thick_Min / 100);
+        AMArea.Ali_Squ_Thick_Min_Y = (int) java.lang.Math.round(Y_Ratio * Squ_Thick * Squ_Thick_Min / 100);
     }
 
     public Point Get_Right_Ali_Point_Def(int Point_Num) {
@@ -785,10 +785,10 @@ public class Class_OMR {
         int Right_Ali_Len;
         Point rP = new Point(0, 0);
 
-        rP.x = (int) (Def_TR_x - Def_TL_x + Mid_Ali_Shift);
+        rP.x = (int) java.lang.Math.round(Def_TR_x - Def_TL_x + Mid_Ali_Shift);
         rP.y = 0;
 
-        Right_Ali_Len = (int) (Def_BR_y - Def_TR_y) / (Right_Ali_Points_Cnt + 1);
+        Right_Ali_Len = (int) java.lang.Math.round((Def_BR_y - Def_TR_y) / (Right_Ali_Points_Cnt + 1));
 
         rP.y += (Right_Ali_Len * Point_Num);
 
@@ -801,7 +801,7 @@ public class Class_OMR {
         double Ll; //Section Formula ' l' at Left
         double Lm; //Section Formula ' m' at Left
 
-        Bottom_Point bPoint = new Bottom_Point((int) Bf.x, (int) Bf.y);
+        Bottom_Point bPoint = new Bottom_Point((int) java.lang.Math.round(Bf.x), (int) java.lang.Math.round(Bf.y));
         Bf = new PointD(Get_Bottom_Point(In.x));
         Bf.x = bPoint.Bx;
         Bf.y = bPoint.By;
@@ -848,8 +848,8 @@ public class Class_OMR {
 
         Left_x = 0;
         Left_y = 0;
-        Act_Left_x = (int) BL_x;
-        Act_Left_y = (int) BL_y;
+        Act_Left_x = (int) java.lang.Math.round(BL_x);
+        Act_Left_y = (int) java.lang.Math.round(BL_y);
         Find_Ok = false;
 
         for (i = 1; i <= Bottom_Ali_Points_Cnt; i++) {
@@ -872,10 +872,10 @@ public class Class_OMR {
         }
 
         if (!Find_Ok) {
-            Right.x = (int) (Def_BR_x - Def_BL_x);
+            Right.x = (int) java.lang.Math.round(Def_BR_x - Def_BL_x);
             Right.y = 0;
-            Act_Right.x = (int) BR_x;
-            Act_Right.y = (int) BR_y;
+            Act_Right.x = (int) java.lang.Math.round(BR_x);
+            Act_Right.y = (int) java.lang.Math.round(BR_y);
         }
 
         Rl = In_x - Left_x;
@@ -892,7 +892,7 @@ public class Class_OMR {
         rP.x = 0;
         rP.y = -Mid_Ali_Shift;
 
-        Bottom_Ali_Len = (int) (Def_BR_x - Def_BL_x) / (Bottom_Ali_Points_Cnt + 1);
+        Bottom_Ali_Len = (int) java.lang.Math.round((Def_BR_x - Def_BL_x) / (Bottom_Ali_Points_Cnt + 1));
 
         rP.x += (Bottom_Ali_Len * Point_Num);
 
@@ -985,7 +985,7 @@ public class Class_OMR {
             PartC = ((A1.x * A2.y) - (A2.x * A1.y)) / (A1.x - A2.x);
 
             try {
-                iP.x = (int) ((PartB - PartC) / PartA);
+                iP.x = (int) java.lang.Math.round((PartB - PartC) / PartA);
             } catch (Exception e) {
                 iP.x = 0;
             }
@@ -1002,7 +1002,7 @@ public class Class_OMR {
             PartC = ((A1.y * A2.x) - (A2.y * A1.x)) / (A1.y - A2.y);
 
             try {
-                iP.y = (int) ((PartB - PartC) / PartA);
+                iP.y = (int) java.lang.Math.round((PartB - PartC) / PartA);
             } catch (Exception e) {
                 iP.y = 0;
             }
@@ -1125,10 +1125,10 @@ public class Class_OMR {
         Point Act_Top = new Point(0, 0);
         Point Act_Bottom = new Point(0, 0);
 
-        Bottom.x = (int) (Def_BR_x - Def_BL_x);
+        Bottom.x = (int) java.lang.Math.round(Def_BR_x - Def_BL_x);
         Bottom.y = 0;
-        Act_Bottom.x = (int) BR_x;
-        Act_Bottom.y = (int) BR_y;
+        Act_Bottom.x = (int) java.lang.Math.round(BR_x);
+        Act_Bottom.y = (int) java.lang.Math.round(BR_y);
         Find_Ok = false;
 
         for (i = 1; i <= Right_Ali_Points_Cnt; i++) {
@@ -1149,10 +1149,10 @@ public class Class_OMR {
         }
 
         if (!Find_Ok) {
-            Top.x = (int) (Def_TR_x - Def_TL_x);
-            Top.y = (int) (Def_BR_y - Def_TR_y);
-            Act_Top.x = (int) TR_x;
-            Act_Top.y = (int) TR_y;
+            Top.x = (int) java.lang.Math.round(Def_TR_x - Def_TL_x);
+            Top.y = (int) java.lang.Math.round(Def_BR_y - Def_TR_y);
+            Act_Top.x = (int) java.lang.Math.round(TR_x);
+            Act_Top.y = (int) java.lang.Math.round(TR_y);
         }
 
         Rl = In_y - Bottom.y;
@@ -1240,9 +1240,7 @@ public class Class_OMR {
         B.y = Bubble_Offset_y - ((By_Num - 1) * Bubble_Vert_Space);
 
         //Call Get_Point(Bx, By, Bubble_x, Bubble_y)
-        Get_Point_Mid_Ali(B.x, B.y, Bubble_x, Bubble_y)
-
-                use round insted of casting
+        Get_Point_Mid_Ali(B.x, B.y, Bubble_x, Bubble_y);
 
         return Bubble;
     }
