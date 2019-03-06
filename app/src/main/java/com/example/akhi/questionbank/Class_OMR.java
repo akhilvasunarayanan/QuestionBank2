@@ -2,6 +2,7 @@ package com.example.akhi.questionbank;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.support.v4.graphics.ColorUtils;
 
@@ -712,20 +713,7 @@ public class Class_OMR {
     */
     //endregion
 
-    public class Allignment_Mark_Area {
-        public int Left_x[];
-        public int Right_x[];
-        public int Top_y[];
-        public int Bottom_y[];
-        public int Ali_Squ_Thick_Max_X;
-        public int Ali_Squ_Thick_Max_Y;
-        public int Ali_Squ_Thick_Min_X;
-        public int Ali_Squ_Thick_Min_Y;
-        public int Ali_Blank_Space_X;
-        public int Ali_Blank_Space_Y;
-    }
-
-    public void Get_Allignment_Mark_Area(int Sheet_Hight, int Sheet_Width, int Ans_Sheet_Type, Allignment_Mark_Area AMArea) {
+    public void Get_Allignment_Mark_Area(int Sheet_Hight, int Sheet_Width, int[] Left_x, int[] Right_x, int[] Top_y, int[] Bottom_y, Point Ali_Squ_Thick_Max, Point Ali_Squ_Thick_Min, Point Ali_Blank_Space, int Ans_Sheet_Type) {
 
         double X_Ratio;
         double Y_Ratio;
@@ -740,44 +728,44 @@ public class Class_OMR {
         Y_Ratio = Sheet_Hight / (Def_BL_y + Def_TL_y);
 
         //Top Left Allignment Area
-        AMArea.Left_x[1] = 0;
-        AMArea.Right_x[1] = (int) java.lang.Math.round(X_Ratio * (Def_TL_x + 93));
-        AMArea.Top_y[1] = 0;
-        AMArea.Bottom_y[1] = (int) java.lang.Math.round(Y_Ratio * (Def_TL_y + 93));
+        Left_x[1] = 0;
+        Right_x[1] = (int) java.lang.Math.round(X_Ratio * (Def_TL_x + 93));
+        Top_y[1] = 0;
+        Bottom_y[1] = (int) java.lang.Math.round(Y_Ratio * (Def_TL_y + 93));
 
         //Top Right Allignment Area
-        AMArea.Left_x[2] = (int) java.lang.Math.round(X_Ratio * (Def_TR_x - 93));
-        AMArea.Right_x[2] = Sheet_Width;
-        AMArea.Top_y[2] = 0;
-        AMArea.Bottom_y[2] = (int) java.lang.Math.round(Y_Ratio * (Def_TR_y + 93));
+        Left_x[2] = (int) java.lang.Math.round(X_Ratio * (Def_TR_x - 93));
+        Right_x[2] = Sheet_Width;
+        Top_y[2] = 0;
+        Bottom_y[2] = (int) java.lang.Math.round(Y_Ratio * (Def_TR_y + 93));
 
         //Bottom Right Allignment Area
-        AMArea.Left_x[3] = (int) java.lang.Math.round(X_Ratio * (Def_BR_x - 93));
-        AMArea.Right_x[3] = Sheet_Width;
-        AMArea.Top_y[3] = (int) java.lang.Math.round(Y_Ratio * (Def_BR_y - 93));
-        AMArea.Bottom_y[3] = Sheet_Hight;
+        Left_x[3] = (int) java.lang.Math.round(X_Ratio * (Def_BR_x - 93));
+        Right_x[3] = Sheet_Width;
+        Top_y[3] = (int) java.lang.Math.round(Y_Ratio * (Def_BR_y - 93));
+        Bottom_y[3] = Sheet_Hight;
 
         //Bottom Left Allignment Area
-        AMArea.Left_x[4] = 0;
-        AMArea.Right_x[4] = (int) java.lang.Math.round(X_Ratio * (Def_BL_x + 93));
-        AMArea.Top_y[4] = (int) java.lang.Math.round(Y_Ratio * (Def_BL_y - 93));
-        AMArea.Bottom_y[4] = Sheet_Hight;
+        Left_x[4] = 0;
+        Right_x[4] = (int) java.lang.Math.round(X_Ratio * (Def_BL_x + 93));
+        Top_y[4] = (int) java.lang.Math.round(Y_Ratio * (Def_BL_y - 93));
+        Bottom_y[4] = Sheet_Hight;
 
         for (i = 0; i <= 4; i++) {
-            if (AMArea.Left_x[i] < 0) AMArea.Left_x[i] = 0;
-            if (AMArea.Right_x[i] > Sheet_Width) AMArea.Right_x[i] = Sheet_Width;
-            if (AMArea.Top_y[i] < 0) AMArea.Top_y[i] = 0;
-            if (AMArea.Bottom_y[i] > Sheet_Hight) AMArea.Bottom_y[i] = Sheet_Hight;
+            if (Left_x[i] < 0) Left_x[i] = 0;
+            if (Right_x[i] > Sheet_Width) Right_x[i] = Sheet_Width;
+            if (Top_y[i] < 0) Top_y[i] = 0;
+            if (Bottom_y[i] > Sheet_Hight) Bottom_y[i] = Sheet_Hight;
         }
 
-        AMArea.Ali_Blank_Space_X = (int) java.lang.Math.round(X_Ratio * Squ_Blank_Space_x);
-        AMArea.Ali_Blank_Space_Y = (int) java.lang.Math.round(Y_Ratio * Squ_Blank_Space_y);
+        Ali_Blank_Space.x = (int) java.lang.Math.round(X_Ratio * Squ_Blank_Space_x);
+        Ali_Blank_Space.y = (int) java.lang.Math.round(Y_Ratio * Squ_Blank_Space_y);
 
-        AMArea.Ali_Squ_Thick_Max_X = (int) java.lang.Math.round(X_Ratio * Squ_Thick * Squ_Thick_Max / 100);
-        AMArea.Ali_Squ_Thick_Max_Y = (int) java.lang.Math.round(Y_Ratio * Squ_Thick * Squ_Thick_Max / 100);
+        Ali_Squ_Thick_Max.x = (int) java.lang.Math.round(X_Ratio * Squ_Thick * Squ_Thick_Max / 100);
+        Ali_Squ_Thick_Max.y = (int) java.lang.Math.round(Y_Ratio * Squ_Thick * Squ_Thick_Max / 100);
 
-        AMArea.Ali_Squ_Thick_Min_X = (int) java.lang.Math.round(X_Ratio * Squ_Thick * Squ_Thick_Min / 100);
-        AMArea.Ali_Squ_Thick_Min_Y = (int) java.lang.Math.round(Y_Ratio * Squ_Thick * Squ_Thick_Min / 100);
+        Ali_Squ_Thick_Min.x = (int) java.lang.Math.round(X_Ratio * Squ_Thick * Squ_Thick_Min / 100);
+        Ali_Squ_Thick_Min.y = (int) java.lang.Math.round(Y_Ratio * Squ_Thick * Squ_Thick_Min / 100);
     }
 
     public Point Get_Right_Ali_Point_Def(int Point_Num) {
@@ -1085,8 +1073,9 @@ public class Class_OMR {
         YRatio = java.lang.Math.abs(YRatio);
     }
 
-    public PointD Get_Point_Mid_Ali(PointD In) {
+    public PointD Get_Point_Mid_Ali(PointD _In) {
 
+        PointD In = new PointD(_In);
         PointD Tf = new PointD(0, 0);
         PointD Bf = new PointD(0, 0);
         PointD Lf = new PointD(0, 0);
@@ -1190,8 +1179,9 @@ public class Class_OMR {
         return Bubble;
     }
 
-    public double Get_Bubble_Mark_Brightness(Bitmap BmOmr, Point Bubble) {
+    public double Get_Bubble_Mark_Brightness(Bitmap BmOmr, Point _Bubble) {
 
+        Point Bubble = new Point(_Bubble);
         int x;
         int y;
         int Omr_Bubble_Height;
@@ -1224,7 +1214,6 @@ public class Class_OMR {
 
     public Point Get_Bubble(int Qu_Num, int Choice, int Total_Column) {
 
-        Point Bubble = new Point(0, 0);
         PointD B = new PointD();
         int ColumnIndex;
         int By_Num;
@@ -1240,104 +1229,102 @@ public class Class_OMR {
         B.y = Bubble_Offset_y - ((By_Num - 1) * Bubble_Vert_Space);
 
         //Call Get_Point(Bx, By, Bubble_x, Bubble_y)
-        Get_Point_Mid_Ali(B.x, B.y, Bubble_x, Bubble_y);
-
-        return Bubble;
+        return Get_Point_Mid_Ali(B).ToPoint();
     }
 
-    Public Function Get_Ans_Bubble_Mark_Brightness(ByRef BmOmr As Bitmap, _
-            ByVal Qu_Num As Integer, _
-                                                           ByVal Choice As SByte) As Double
+    public double Get_Ans_Bubble_Mark_Brightness(Bitmap BmOmr, int Qu_Num, int Choice) {
 
-    Dim Bubble_x As Integer
-    Dim Bubble_y As Integer
+        Point Bubble = new Point(0, 0);
 
-    Call Get_Bubble(Qu_Num, Choice, Total_Column, Bubble_x, Bubble_y)
-    Get_Ans_Bubble_Mark_Brightness = Get_Bubble_Mark_Brightness(BmOmr, Bubble_x, Bubble_y)
+        Bubble = Get_Bubble(Qu_Num, Choice, Total_Column);
+        return Get_Bubble_Mark_Brightness(BmOmr, Bubble);
+    }
 
-    End Function
+    private class Ali_Rotation_Mark {
 
+        double Avg_Bri;
+        boolean Ali_Rotation_Mark;
+    }
 
+    public Ali_Rotation_Mark Get_Ali_Rotation_Mark(Bitmap BmOmr, Point _A) {
 
-    Public Function Get_Ali_Rotation_Mark(ByRef BmOmr As Bitmap, _
-            ByVal Ax As Integer, _
-                                                  ByVal Ay As Integer, _
-                                                  Optional ByRef Avg_Bri As Double = 0) As Boolean
+        Point A = new Point(_A);
+        int x;
+        int y;
+        int Omr_Bubble_Height;
+        int Omr_Bubble_Width;
+        double Tot_Bri = 0;
+        int Tot_Cnt = 0;
+        Ali_Rotation_Mark ret = new Ali_Rotation_Mark();
 
-    Dim x As Integer
-    Dim y As Integer
-    Dim Omr_Bubble_Height As Integer
-    Dim Omr_Bubble_Width As Integer
-    Dim Tot_Bri As Double
-    Dim Tot_Cnt As Integer
+        Omr_Bubble_Width = (int) java.lang.Math.round(Bubble_Width * XRatio);
+        Omr_Bubble_Height = (int) java.lang.Math.round(Bubble_Height * YRatio);
 
-    Omr_Bubble_Width = Math.Round(Bubble_Width * XRatio)
-    Omr_Bubble_Height = Math.Round(Bubble_Height * YRatio)
+        for (x = A.x - (Squ_Thick / 2); x <= (A.x + (Squ_Thick / 2)); x++) {
+            for (y = (A.y - (Squ_Thick / 2)); y <= (A.y + (Squ_Thick / 2)); y++) {
+                Tot_Bri += GetBrightness(BmOmr.getPixel(x, y));
+                Tot_Cnt += 1;
+            }
+        }
 
-    Tot_Bri = 0
-    Tot_Cnt = 0
+        ret.Avg_Bri = Tot_Bri / Tot_Cnt;
 
-    For x = Ax - (Squ_Thick / 2) To Ax + (Squ_Thick / 2)
-    For y = Ay - (Squ_Thick / 2) To Ay + (Squ_Thick / 2)
-    Tot_Bri += BmOmr.GetPixel(x, y).GetBrightness
-    Tot_Cnt += 1
-    Next
-            Next
+        if (ret.Avg_Bri < Ali_Bri_Level) {
+            ret.Ali_Rotation_Mark = true;
+        } else {
+            ret.Ali_Rotation_Mark = false;
+        }
 
-    Avg_Bri = Tot_Bri / Tot_Cnt
+        return ret;
+    }
 
-    If Avg_Bri < Ali_Bri_Level Then
-            Get_Ali_Rotation_Mark = True
-    Else
-            Get_Ali_Rotation_Mark = False
-    End If
+    public boolean Get_Center_Alignment_Mark(Bitmap BmOmr) {
 
-    End Function
+        Point A;
+        int i;
+        Ali_Rotation_Mark ret = new Ali_Rotation_Mark();
+        ret.Ali_Rotation_Mark = false;
 
-    Public Function Get_Center_Alignment_Mark(ByRef BmOmr As Bitmap) As Boolean
+        for (i = 1; i <= Bottom_Ali_Points_Cnt; i++) {
+            A = Get_Bottom_Ali_Point_Def(i);
+            A = Get_Point(new PointD(A));
+            ret = Get_Ali_Rotation_Mark(BmOmr, A);
+            if (ret.Ali_Rotation_Mark == false) break;
+        }
 
-    Dim Ax As Integer
-    Dim Ay As Integer
-    Dim i As Integer
+        return ret.Ali_Rotation_Mark;
+    }
 
-    For i = 1 To Bottom_Ali_Points_Cnt
-    Call Get_Bottom_Ali_Point_Def(i, Ax, Ay)
-    Call Get_Point(Ax, Ay, Ax, Ay)
-    Get_Center_Alignment_Mark = Get_Ali_Rotation_Mark(BmOmr, Ax, Ay)
-    If Get_Center_Alignment_Mark = False Then Exit For
-            Next
+    private Bitmap RotateBitmap(Bitmap BmOmr, float Degrees){
 
-    End Function
+        Bitmap bOutput;
+        Matrix matrix = new Matrix();
+        matrix.setRotate(Degrees);
+        bOutput = Bitmap.createBitmap(BmOmr, 0, 0, BmOmr.getWidth(), BmOmr.getHeight(), matrix, true);
+        return bOutput;
+    }
 
+    public boolean Alignment_Detect(Bitmap BmOmr, Point[] Ali, int Ans_Sheet_Type){
 
+    int[] Left_x = new int[5];
+    int[] Right_x  = new int[5] ;
+    int[] Top_y = new int[5];
+    int[] Bottom_y = new int[5];
+    Point Ali_Squ_Thick_Max = new Point(0,0);
+    Point Ali_Squ_Thick_Min = new Point(0,0);
+    Point Ali_Blank_Space = new Point(0,0);
+    PointD Tolerance = new PointD();
+    boolean Right_Ali;
+    boolean Bottom_Ali;
+    boolean ret;
 
-    Public Function Alignment_Detect(ByRef BmOmr As Bitmap, _
-            ByRef Ali_x() As Integer, _
-    ByRef Ali_y() As Integer, _
-    ByVal Ans_Sheet_Type As Integer) As Boolean
+    if( BmOmr.getHeight() < BmOmr.getWidth()) {
+        BmOmr = RotateBitmap(BmOmr, 90);
+    }
 
-    Dim Left_x(4) As Integer
-    Dim Right_x(4) As Integer
-    Dim Top_y(4) As Integer
-    Dim Bottom_y(4) As Integer
-    Dim Ali_Squ_Thick_Max_X As Integer
-    Dim Ali_Squ_Thick_Max_Y As Integer
-    Dim Ali_Squ_Thick_Min_X As Integer
-    Dim Ali_Squ_Thick_Min_Y As Integer
-    Dim Ali_Blank_Space_X As Integer
-    Dim Ali_Blank_Space_Y As Integer
-    Dim X_Tolerance As Double
-    Dim Y_Tolerance As Double
-    Dim Right_Ali As Boolean
-    Dim Bottom_Ali As Boolean
+    Get_Allignment_Mark_Area(BmOmr.getHeight(), BmOmr.getWidth(), Left_x, Right_x, Top_y, Bottom_y, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Ali_Blank_Space, Ans_Sheet_Type);
 
-    If BmOmr.Height < BmOmr.Width Then
-            BmOmr.RotateFlip(RotateFlipType.Rotate90FlipNone)
-    End If
-
-    Call Get_Allignment_Mark_Area(BmOmr.Height, BmOmr.Width, Left_x, Right_x, Top_y, Bottom_y, Ali_Squ_Thick_Max_X, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_X, Ali_Squ_Thick_Min_Y, Ali_Blank_Space_X, Ali_Blank_Space_Y, Ans_Sheet_Type)
-
-    Alignment_Detect = Detect_Alignment_Points(BmOmr, False, Ali_Blank_Space_X, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_X, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_X, Ali_Squ_Thick_Min_Y, Left_x, Right_x, Top_y, Bottom_y, Ali_x, Ali_y)
+    ret = Detect_Alignment_Points(BmOmr, False, Ali_Blank_Space_X, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_X, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_X, Ali_Squ_Thick_Min_Y, Left_x, Right_x, Top_y, Bottom_y, Ali_x, Ali_y)
 
     If Alignment_Detect = True Then
 
