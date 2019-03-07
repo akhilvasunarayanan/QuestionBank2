@@ -1030,21 +1030,21 @@ public class Class_OMR {
         Calculate_Side_Length_And_Ratio();
     }
 
-    public void Set_Alignment(double In_TL_x, double In_TL_y, double In_TR_x, double In_TR_y, double In_BL_x, double In_BL_y, double In_BR_x, double In_BR_y, int Ans_Sheet_Type) {
+    public void Set_Alignment(PointD In_TL, PointD In_TR, PointD In_BL, PointD In_BR, int Ans_Sheet_Type) {
 
         Load_Alignment(Ans_Sheet_Type);
 
-        TL_x = In_TL_x;
-        TL_y = In_TL_y;
+        TL_x = In_TL.x;
+        TL_y = In_TL.y;
 
-        TR_x = In_TR_x;
-        TR_y = In_TR_y;
+        TR_x = In_TR.x;
+        TR_y = In_TR.y;
 
-        BL_x = In_BL_x;
-        BL_y = In_BL_y;
+        BL_x = In_BL.x;
+        BL_y = In_BL.y;
 
-        BR_x = In_BR_x;
-        BR_y = In_BR_y;
+        BR_x = In_BR.x;
+        BR_y = In_BR.y;
 
         Calculate_Side_Length_And_Ratio();
     }
@@ -1304,604 +1304,642 @@ public class Class_OMR {
         return bOutput;
     }
 
-    public boolean Alignment_Detect(Bitmap BmOmr, Point[] Ali, int Ans_Sheet_Type){
+    private boolean Detect_Alignment_Points(Bitmap BmOmr, boolean Swap_xy,
+                                            Point _Ali_Blank_Space,
+                                            Point _Ali_Squ_Thick_Max,
+                                            Point _Ali_Squ_Thick_Min,
+                                            int[] Left_x,
+                                            int[] Right_x,
+                                            int[] Top_y,
+                                            int[] Bottom_y,
+                                            Point[] Ali) {
 
-    int[] Left_x = new int[5];
-    int[] Right_x  = new int[5] ;
-    int[] Top_y = new int[5];
-    int[] Bottom_y = new int[5];
-    Point Ali_Squ_Thick_Max = new Point(0,0);
-    Point Ali_Squ_Thick_Min = new Point(0,0);
-    Point Ali_Blank_Space = new Point(0,0);
-    PointD Tolerance = new PointD();
-    boolean Right_Ali;
-    boolean Bottom_Ali;
-    boolean ret;
+        Point Ali_Blank_Space = new Point(_Ali_Blank_Space);
+        Point Ali_Squ_Thick_Max = new Point(_Ali_Squ_Thick_Max);
+        Point Ali_Squ_Thick_Min = new Point(_Ali_Squ_Thick_Min);
 
-    if( BmOmr.getHeight() < BmOmr.getWidth()) {
-        BmOmr = RotateBitmap(BmOmr, 90);
+        int i;
+        int FTop_y;
+        int FBottom_y;
+        int FLeft_x;
+        int FRight_x;
+        boolean ret = false;
+
+        for (i = 1; i <= 4; i++) {
+
+            ret = false;
+
+            if( i == 1 || i == 2) {
+                FTop_y = Top_y[i];
+                FBottom_y = Bottom_y[i];
+            }
+            else {
+                FTop_y = Bottom_y[i];
+                FBottom_y = Top_y[i];
+            }
+
+            if(i == 1 || i == 4) {
+                FLeft_x = Left_x[i];
+                FRight_x = Right_x[i];
+            }
+            else {
+                FLeft_x = Right_x[i];
+                FRight_x = Left_x[i];
+            }
+
+            ret = Get_Alignment_Point(BmOmr, Swap_xy, Ali_Blank_Space, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, FLeft_x, FRight_x, FTop_y, FBottom_y, Ali[i]);
+
+            if(ret == false) break;
+        }
+
+        return ret;
     }
 
-    Get_Allignment_Mark_Area(BmOmr.getHeight(), BmOmr.getWidth(), Left_x, Right_x, Top_y, Bottom_y, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Ali_Blank_Space, Ans_Sheet_Type);
+    private boolean Get_Alignment_Point(Bitmap BmOmr,
+                                        boolean Swap_xy,
+                                        Point _Ali_Blank_Space,
+                                        Point _Ali_Squ_Thick_Max,
+                                        Point _Ali_Squ_Thick_Min,
+                                        int Left_x, int Right_x,
+                                        int Top_y, int Bottom_y,
+                                        Point Ali) {
+
+        Point Ali_Blank_Space = new Point(_Ali_Blank_Space);
+        Point Ali_Squ_Thick_Max = new Point(_Ali_Squ_Thick_Max);
+        Point Ali_Squ_Thick_Min = new Point(_Ali_Squ_Thick_Min);
+        int Sy;
+        int Step_y;
+        boolean ret = false;
+
+        if (Top_y <= Bottom_y) {
+            Step_y = 1;
+        } else {
+            Step_y = -1;
+        }
+
+        for (Sy = Top_y; Sy != Bottom_y; Sy += Step_y) {
+            if (Find_X_Pattern(BmOmr, Swap_xy, Ali_Blank_Space, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Sy, Left_x, Right_x, Top_y, Bottom_y, Ali)) {
+                ret = true;
+                break;
+            }
+        }
+
+        return ret;
+    }
+
+    private boolean Find_X_Pattern(Bitmap BmOmr,
+                                   boolean Swap_xy,
+                                   Point _Ali_Blank_Space,
+                                   Point Ali_Squ_Thick_Max,
+                                   Point Ali_Squ_Thick_Min,
+                                   int y,
+                                   int Left_x, int Right_x,
+                                   int Top_y, int Bottom_y,
+                                   Point Ali) {
+
+        Point Ali_Blank_Space = new Point(_Ali_Blank_Space);
+        double PixBri;
+        boolean Bri_Dar;
+        boolean First_Block = false;
+        boolean Second_Block = false;
+        boolean Third_Block = false;
+        int Block_Len = 0;
+        int x;
+        int Mark_Start_x = 0;
+        int Mark_End_x = 0;
+        int Step_x;
+        boolean ret = false;
+
+        if (Left_x <= Right_x) {
+            Step_x = 1;
+        } else {
+            Step_x = -1;
+        }
+
+        for (x = Left_x; x != Right_x; x += Step_x) {
+
+            if (!Swap_xy) {
+                PixBri = GetBrightness(BmOmr.getPixel(x, y));
+            } else {
+                PixBri = GetBrightness(BmOmr.getPixel(y, x));
+            }
+
+            if (PixBri >= Ali_Bri_Level) {
+                Bri_Dar = true;
+            } else {
+                Bri_Dar = false;
+            }
+
+            if (!First_Block) {
+
+                if (Bri_Dar) {
+                    Block_Len += 1;
+                } else {
+
+                    if (Block_Len >= Ali_Blank_Space.x) {
+                        First_Block = true;
+                        Mark_Start_x = x;
+                        Block_Len = 1;
+                    } else {
+                        Block_Len = 0;
+                    }
+
+                }
+
+            } else if (!Second_Block) {
+
+                if (!Bri_Dar) {
+                    Block_Len += 1;
+                } else {
+
+                    if (Block_Len <= Ali_Squ_Thick_Max.x && Block_Len >= Ali_Squ_Thick_Min.x) {
+                        Second_Block = true;
+                        Mark_End_x = x - 1;
+                        Block_Len = 1;
+                    } else {
+                        First_Block = false;
+                        Block_Len = 0;
+                    }
+                }
+            } else if (!Third_Block) {
+
+                if (Bri_Dar) {
+
+                    Block_Len += 1;
+
+                    if (Block_Len >= Ali_Blank_Space.x) {
+
+                        Third_Block = true;
+
+                        if (Find_Y_Pattern(BmOmr, Swap_xy, Ali_Blank_Space.y, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, y, Top_y, Bottom_y, Mark_Start_x, Mark_End_x, Ali)) {
+                            Ali.x = (Mark_Start_x + Mark_End_x) / 2;
+                            return true;
+                        } else {
+                            First_Block = false;
+                            Second_Block = false;
+                            Third_Block = false;
+                        }
+                    }
+                } else {
+                    First_Block = false;
+                    Second_Block = false;
+                    Block_Len = 0;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    private boolean Find_Y_Pattern(Bitmap BmOmr,
+                                   boolean Swap_xy,
+                                   int Ali_Blank_Space_Y,
+                                   Point Ali_Squ_Thick_Max,
+                                   Point Ali_Squ_Thick_Min,
+                                   int Sel_y,
+                                   int Top_y, int Bottom_y,
+                                   int Mark_Start_x, int Mark_End_x,
+                                   Point Ali) {
+
+        int Mid_Mark_Start_x;
+        int Mid_Mark_End_x;
+        boolean ret;
+
+        Mid_Mark_Start_x = Mark_Start_x;
+        Mid_Mark_End_x = Mark_Start_x + (Mark_End_x - Mark_Start_x) / 2;
+
+        ret = Find_Y_Pattern_Sub(BmOmr, Swap_xy, Ali_Blank_Space_Y, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Sel_y, Top_y, Bottom_y, Mid_Mark_Start_x, Mid_Mark_End_x, Ali);
+
+        if (!ret) return ret;
+
+        Mid_Mark_Start_x = (int) java.lang.Math.round(Mid_Mark_End_x + java.lang.Math.signum(Mark_End_x - Mark_Start_x));
+        Mid_Mark_End_x = Mark_End_x;
+
+        ret = Find_Y_Pattern_Sub(BmOmr, Swap_xy, Ali_Blank_Space_Y, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Sel_y, Top_y, Bottom_y, Mid_Mark_Start_x, Mid_Mark_End_x, Ali);
+
+        return ret;
+    }
+
+    private boolean Find_Y_Pattern_Sub(Bitmap BmOmr,
+                                       boolean Swap_xy,
+                                       int Ali_Blank_Space_Y,
+                                       Point Ali_Squ_Thick_Max,
+                                       Point Ali_Squ_Thick_Min,
+                                       int Sel_y,
+                                       int Top_y, int Bottom_y,
+                                       int Mark_Start_x, int Mark_End_x,
+                                       Point Ali) {
+
+        int x;
+        Check_Y_Line_Par CYLPar = new Check_Y_Line_Par();
+        int Step_x;
+        boolean ret = false;
+
+        if (Mark_Start_x <= Mark_End_x) {
+            Step_x = 1;
+        } else {
+            Step_x = -1;
+        }
+
+        for (x = Mark_Start_x; x != Mark_End_x; x += Step_x) {
+
+            Check_Y_Line(BmOmr, Swap_xy, new Point(x, Sel_y), Top_y, Bottom_y, Ali, CYLPar);
+
+            if (CYLPar.Mark_Len <= Ali_Squ_Thick_Max.y && CYLPar.Mark_Len >= Ali_Squ_Thick_Min.y && CYLPar.Top_Blank_Len >= Ali_Blank_Space_Y && CYLPar.Bottom_Blank_Len >= Ali_Blank_Space_Y) {
+                ret = true;
+                break;
+            }
+        }
+
+        return ret;
+    }
+
+    private class Check_Y_Line_Par {
+
+        public int Top_Blank_Len;
+        public int Mark_Len;
+        public int Bottom_Blank_Len;
+
+        public Check_Y_Line_Par(int _Top_Blank_Len, int _Mark_Len, int _Bottom_Blank_Len){
+            Top_Blank_Len = _Top_Blank_Len;
+            Mark_Len = _Mark_Len;
+            Bottom_Blank_Len = _Bottom_Blank_Len;
+        }
+
+        public Check_Y_Line_Par(){
+            Top_Blank_Len = 0;
+            Mark_Len = 0;
+            Bottom_Blank_Len = 0;
+        }
+    }
+
+    private void Check_Y_Line(Bitmap BmOmr,
+                              boolean Swap_xy,
+                              Point _S,
+                              int Top_y, int Bottom_y,
+                              Point Ali,
+                              Check_Y_Line_Par par) {
+
+        Point S = new Point(_S);
+        Check_Y_Line_Half_Par CYLHPar_1 = new Check_Y_Line_Half_Par(0, par.Top_Blank_Len, 0);
+        Check_Y_Line_Half_Par CYLHPar_2 = new Check_Y_Line_Half_Par(0, par.Bottom_Blank_Len, 0);
+
+        Check_Y_Line_Half(BmOmr, Swap_xy, S.x, S.y, Top_y, CYLHPar_1);
+        par.Top_Blank_Len = CYLHPar_1.Blank_Len;
+
+        Check_Y_Line_Half(BmOmr, Swap_xy, S.x, S.y, Bottom_y, CYLHPar_2);
+        par.Bottom_Blank_Len = CYLHPar_1.Blank_Len;
+
+        par.Mark_Len = CYLHPar_1.Mark_Len + CYLHPar_2.Mark_Len - 1;
+        Ali.y = (CYLHPar_1.Mark_End_y + CYLHPar_2.Mark_End_y) / 2;
+    }
+
+    private class Check_Y_Line_Half_Par{
+
+        public int Mark_Len;
+        public int Blank_Len;
+        public int Mark_End_y;
+
+        public Check_Y_Line_Half_Par(){
+            Mark_Len = 0;
+            Blank_Len = 0;
+            Mark_End_y = 0;
+        }
+
+        public Check_Y_Line_Half_Par(int _Mark_Len, int _Blank_Len, int _Mark_End_y){
+            Mark_Len = _Mark_Len;
+            Blank_Len = _Blank_Len;
+            Mark_End_y = _Mark_End_y;
+        }
+    }
+
+    private void Check_Y_Line_Half(Bitmap BmOmr,
+                                   boolean Swap_xy,
+                                   int Sx,
+                                   int Start_y, int Stop_y,
+                                   Check_Y_Line_Half_Par par) {
+
+        int y;
+        int Step_y;
+        double PixBri;
+        boolean Bri;
+        boolean Mark_Ok;
+
+        if (Start_y <= Stop_y) {
+            Step_y = 1;
+        } else {
+            Step_y = -1;
+        }
+
+        par.Mark_Len = 0;
+        par.Blank_Len = 0;
+        Mark_Ok = false;
+
+        for (y = Start_y; y != Stop_y; y += Step_y) {
+
+            if (!Swap_xy) {
+                PixBri = GetBrightness(BmOmr.getPixel(Sx, y));
+            } else {
+                PixBri = GetBrightness(BmOmr.getPixel(y, Sx));
+            }
+
+            if (PixBri >= Ali_Bri_Level) {
+                Bri = true;
+            } else {
+                Bri = false;
+            }
+
+            if (!Bri) {
+                if (Mark_Ok) {
+                    break;
+                } else {
+                    par.Mark_Len += 1;
+                }
+            } else {
+
+                if (!Mark_Ok) {
+                    par.Mark_End_y = y - 1;
+                    Mark_Ok = true;
+                }
+
+                par.Blank_Len += 1;
+            }
+        }
+    }
+
+    public boolean Alignment_Detect(Bitmap BmOmr, Point[] Ali, int Ans_Sheet_Type) {
+
+        int[] Left_x = new int[5];
+        int[] Right_x = new int[5];
+        int[] Top_y = new int[5];
+        int[] Bottom_y = new int[5];
+        Point Ali_Squ_Thick_Max = new Point(0, 0);
+        Point Ali_Squ_Thick_Min = new Point(0, 0);
+        Point Ali_Blank_Space = new Point(0, 0);
+        PointD Tolerance = new PointD();
+        boolean Right_Ali;
+        boolean Bottom_Ali;
+        boolean ret;
+
+        if (BmOmr.getHeight() < BmOmr.getWidth()) {
+            BmOmr = RotateBitmap(BmOmr, 90);
+        }
+
+        Get_Allignment_Mark_Area(BmOmr.getHeight(), BmOmr.getWidth(), Left_x, Right_x, Top_y, Bottom_y, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Ali_Blank_Space, Ans_Sheet_Type);
+
+        ret = Detect_Alignment_Points(BmOmr, false, Ali_Blank_Space, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Left_x, Right_x, Top_y, Bottom_y, Ali);
+
+        if (ret) {
+
+            Tolerance.x = BmOmr.getWidth() * Ali_Check_Tolerance / 100;
+            Tolerance.y = BmOmr.getHeight() * Ali_Check_Tolerance / 100;
+
+            Set_Alignment(new PointD(Ali[1]), new PointD(Ali[2]), new PointD(Ali[4]), new PointD(Ali[3]), Ans_Sheet_Type);
+
+            if (java.lang.Math.abs(Top_Len - Bottom_Len) > Tolerance.x) {
+                return false;
+            }
+
+            if (!Get_Center_Alignment_Mark(BmOmr)) {
+
+                Rotate_Plane(Ali);
+                Rotate_Plane(Ali);
+
+                Set_Alignment(new PointD(Ali[1]), new PointD(Ali[2]), new PointD(Ali[4]), new PointD(Ali[3]), Ans_Sheet_Type);
+
+                if (!Get_Center_Alignment_Mark(BmOmr)) {
+                    return false;
+                }
+            }
+
+            Right_Ali = Get_Right_Ali_Positions(BmOmr, Ans_Sheet_Type);
+            Bottom_Ali = Get_Bottom_Ali_Positions(BmOmr, Ans_Sheet_Type);
+
+            if (Right_Ali && Bottom_Ali) {
+                ret = true;
+            } else {
+                ret = false;
+            }
+        }
+
+        return ret;
+    }
+
+    private void Rotate_Plane(Point[] Ali) {
+        int i;
+        Ali[0].x = Ali[4].x;
+        Ali[0].y = Ali[4].y;
+
+        for (i = 4; i != 1; i--) {
+            Ali[i].x = Ali[i - 1].x;
+            Ali[i].y = Ali[i - 1].y;
+        }
+    }
+
+    private boolean Get_Right_Ali_Positions(Bitmap BmOmr, int Ans_Sheet_Type) {
+
+        int Point_Num;
+        Point A = new Point(0, 0);
+        Point Left = new Point(0,0);
+        Point Right = new Point(0,0);
+        Point Top = new Point(0,0);
+        Point Bottom = new Point(0,0);
+        Point Vert_Squ_Thick_Max = new Point(0, 0);
+        Point Vert_Squ_Thick_Min = new Point(0, 0);
+        Point Vert_Blank_Space = new Point(0, 0);
+        Point Ali = new Point(0, 0);
+        boolean ret = false;
+
+        for (Point_Num = 1; Point_Num <= Right_Ali_Points_Cnt; Point_Num++) {
+
+            A = Get_Right_Ali_Point_Def(Point_Num);
+            A = Get_Point(new PointD(A));
+            Get_Right_Ali_Search_Area(A, BmOmr.getHeight(), BmOmr.getWidth(), Left, Right, Top, Bottom, Vert_Squ_Thick_Max, Vert_Squ_Thick_Min, Vert_Blank_Space, Ans_Sheet_Type);
+
+            //Call Draw_Rectangle(BmOmr, Left_x, Right_x, Top_y, Bottom_y)
+
+            ret = Get_Alignment_Point(BmOmr, true, new Point(Vert_Blank_Space.y, Vert_Blank_Space.x), new Point(Vert_Squ_Thick_Max.y, Vert_Squ_Thick_Max.x), new Point(Vert_Squ_Thick_Min.y, Vert_Squ_Thick_Min.x), Top.y, Bottom.y, Left.x, Right.x, Ali);
+
+            Right_Ali[Point_Num].x = Ali.x;
+            Right_Ali[Point_Num].y = Ali.y;
+
+            if (!ret) {
+                break;
+            }
+        }
+
+        return ret;
+    }
+
+    private void Get_Right_Ali_Search_Area(Point _A,
+                                           int Sheet_Hight,
+                                           int Sheet_Width,
+                                           Point Left,
+                                           Point Right,
+                                           Point Top,
+                                           Point Bottom,
+                                           Point Vert_Squ_Thick_Max,
+                                           Point Vert_Squ_Thick_Min,
+                                           Point Vert_Blank_Space,
+                                           int Ans_Sheet_Type) {
+
+        Point A = new Point(_A);
+        Sheet_Hight -= 1;
+        Sheet_Width -= 1;
+
+        //Top Left Allignment Area
+        Left.x = (int) java.lang.Math.round(A.x - (15 * XRatio));
+        Right.x = (int) java.lang.Math.round(A.x + (15 * XRatio));
+        Top.y = (int) java.lang.Math.round(A.y - (24 * YRatio_Right));
+        Bottom.y = (int) java.lang.Math.round(A.y + (24 * YRatio_Right));
+
+        if (Left.x < 0) Left.x = 0;
+        if (Right.x > Sheet_Width) Right.x = Sheet_Width;
+        if (Top.y < 0) Top.y = 0;
+        if (Bottom.y > Sheet_Hight) Bottom.y = Sheet_Hight;
+
+        Vert_Blank_Space.x = (int) java.lang.Math.round(XRatio * Squ_Blank_Space_Width_Wise);
+        Vert_Blank_Space.y = (int) java.lang.Math.round(YRatio_Right * Squ_Blank_Space_Length_Wise);
+
+        Vert_Squ_Thick_Max.x = (int) java.lang.Math.round(XRatio * Squ_Thick * Squ_Thick_Max / 100);
+        Vert_Squ_Thick_Max.y = (int) java.lang.Math.round(YRatio_Right * Squ_Thick * Squ_Thick_Max / 100);
+
+        Vert_Squ_Thick_Min.x = (int) java.lang.Math.round(XRatio * Squ_Thick * Squ_Thick_Min / 100);
+        Vert_Squ_Thick_Min.y = (int) java.lang.Math.round(YRatio_Right * Squ_Thick * Squ_Thick_Min / 100);
+    }
+
+    private boolean Get_Bottom_Ali_Positions(Bitmap BmOmr, int Ans_Sheet_Type) {
+
+        int Point_Num;
+        Point A = new Point(0, 0);
+        Point Left = new Point(0, 0);
+        Point Right = new Point(0, 0);
+        Point Top = new Point(0, 0);
+        Point Bottom = new Point(0, 0);
+        Point Hori_Squ_Thick_Max = new Point(0, 0);
+        Point Hori_Squ_Thick_Min = new Point(0, 0);
+        Point Hori_Blank_Space = new Point(0, 0);
+        Point Ali = new Point(0, 0);
+        boolean ret = false;
+
+        for (Point_Num = 1; Point_Num <= Bottom_Ali_Points_Cnt; Point_Num++) {
+
+            A = Get_Bottom_Ali_Point_Def(Point_Num);
+            A = Get_Point(new PointD(A));
+            Get_Bottom_Ali_Search_Area(A, BmOmr.getHeight(), BmOmr.getWidth(), Left, Right, Top, Bottom, Hori_Squ_Thick_Max, Hori_Squ_Thick_Min, Hori_Blank_Space);
+
+            //Call Draw_Rectangle(BmOmr, Left_x, Right_x, Top_y, Bottom_y)
+
+            ret = Get_Alignment_Point(BmOmr, false, Hori_Blank_Space, Hori_Squ_Thick_Max, Hori_Squ_Thick_Min, Left.x, Right.x, Top.y, Bottom.y, Ali);
+
+            Bottom_Ali[Point_Num].x = Ali.x;
+            Bottom_Ali[Point_Num].y = Ali.y;
+
+            if (!ret) break;
+        }
+
+        return ret;
+    }
+
+    private boolean CheckLoop(int from, int to, int i){
+
+        if(from < to) {
+            if (i <= to) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else if(from > to){
+            if(i >= to){
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            if(i == from){
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
+    private void Draw_Rectangle(Bitmap Bm, int Left_x, int Right_x, int Top_y, int Bottom_y) {
+
+        int i;
+
+        for (i = Left_x; CheckLoop(Left_x, Right_x, i); i += ((Right_x - Left_x) / java.lang.Math.abs(Right_x - Left_x))) {
+            Bm.setPixel(i, Top_y, Color.RED);
+            Bm.setPixel(i, Bottom_y, Color.RED);
+        }
+
+        for (i = Top_y; CheckLoop(Top_y, Bottom_y, i); i += (Bottom_y - Top_y) / java.lang.Math.abs(Bottom_y - Top_y)) {
+            Bm.setPixel(Left_x, i, Color.RED);
+            Bm.setPixel(Right_x, i, Color.RED);
+        }
+    }
+
+    private void Get_Bottom_Ali_Search_Area(Point _A,
+                                            int Sheet_Hight,
+                                            int Sheet_Width,
+                                            Point Left,
+                                            Point Right,
+                                            Point Top,
+                                            Point Bottom,
+                                            Point Hori_Squ_Thick_Max,
+                                            Point Hori_Squ_Thick_Min,
+                                            Point Hori_Blank_Space) {
+
+        Point A = new Point(_A);
+        Sheet_Hight -= 1;
+        Sheet_Width -= 1;
+
+        //Top Left Allignment Area
+        Left.x = (int) java.lang.Math.round(A.x - (24 * XRatio));
+        Right.x = (int) java.lang.Math.round(A.x + (24 * XRatio));
+        Top.y = (int) java.lang.Math.round(A.y + (15 * YRatio_Right)); //Top become bottom for scaning from bottom to top
+        Bottom.y = (int) java.lang.Math.round(A.y - (15 * YRatio_Right));
+
+        if (Left.x < 0) Left.x = 0;
+        if (Right.x > Sheet_Width) Right.x = Sheet_Width;
+        if (Top.y < 0) Top.y = 0;
+        if (Bottom.y > Sheet_Hight) Bottom.y = Sheet_Hight;
+
+        Hori_Blank_Space.x = (int) java.lang.Math.round(XRatio_Bottom * Squ_Blank_Space_Length_Wise);
+        Hori_Blank_Space.y = (int) java.lang.Math.round(YRatio * Squ_Blank_Space_Width_Wise);
+
+        Hori_Squ_Thick_Max.x = (int) java.lang.Math.round(XRatio_Bottom * Squ_Thick * Squ_Thick_Max / 100);
+        Hori_Squ_Thick_Max.y = (int) java.lang.Math.round(YRatio * Squ_Thick * Squ_Thick_Max / 100);
+
+        Hori_Squ_Thick_Min.x = (int) java.lang.Math.round(XRatio_Bottom * Squ_Thick * Squ_Thick_Min / 100);
+        Hori_Squ_Thick_Min.y = (int) java.lang.Math.round(YRatio * Squ_Thick * Squ_Thick_Min / 100);
+    }
 
-    ret = Detect_Alignment_Points(BmOmr, False, Ali_Blank_Space_X, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_X, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_X, Ali_Squ_Thick_Min_Y, Left_x, Right_x, Top_y, Bottom_y, Ali_x, Ali_y)
 
-    If Alignment_Detect = True Then
 
-            X_Tolerance = BmOmr.Width * Ali_Check_Tolerance / 100
-    Y_Tolerance = BmOmr.Height * Ali_Check_Tolerance / 100
 
-    Call Set_Alignment(Ali_x(1), Ali_y(1), Ali_x(2), Ali_y(2), Ali_x(4), Ali_y(4), Ali_x(3), Ali_y(3), Ans_Sheet_Type)
 
-    If Math.Abs(Top_Len - Bottom_Len) > X_Tolerance Then
-    Alignment_Detect = False
-    Exit Function
-    End If
 
-    If Get_Center_Alignment_Mark(BmOmr) = False Then
 
-    Call Rotate_Plane(Ali_x, Ali_y)
-    Call Rotate_Plane(Ali_x, Ali_y)
 
-    Call Set_Alignment(Ali_x(1), Ali_y(1), Ali_x(2), Ali_y(2), Ali_x(4), Ali_y(4), Ali_x(3), Ali_y(3), Ans_Sheet_Type)
 
-    If Get_Center_Alignment_Mark(BmOmr) = False Then
-    Alignment_Detect = False
-    Exit Function
-    End If
 
-    End If
 
-    Right_Ali = Get_Right_Ali_Positions(BmOmr, Ans_Sheet_Type)
-    Bottom_Ali = Get_Bottom_Ali_Positions(BmOmr, Ans_Sheet_Type)
 
-    If Right_Ali = True And Bottom_Ali = True Then
-            Alignment_Detect = True
-    Else
-            Alignment_Detect = False
-    End If
 
-    End If
 
-    End Function
 
-    Private Sub Draw_Rectangle(ByRef Bm As Bitmap, _
-            ByVal Left_x As Integer, _
-                                       ByVal Right_x As Integer, _
-                                       ByVal Top_y As Integer, _
-                                       ByVal Bottom_y As Integer)
 
-    Dim i As Integer
 
-    For i = Left_x To Right_x Step (Right_x - Left_x) / Math.Abs(Right_x - Left_x)
-            Bm.SetPixel(i, Top_y, Color.Red)
-            Bm.SetPixel(i, Bottom_y, Color.Red)
-    Next
 
-    For i = Top_y To Bottom_y Step (Bottom_y - Top_y) / Math.Abs(Bottom_y - Top_y)
-            Bm.SetPixel(Left_x, i, Color.Red)
-            Bm.SetPixel(Right_x, i, Color.Red)
-    Next
 
-    End Sub
 
-    Private Function Get_Bottom_Ali_Positions(ByRef BmOmr As Bitmap, _
-            ByRef Ans_Sheet_Type As Integer) As Boolean
 
-    Dim Point_Num As Integer
-    Dim Ax As Integer
-    Dim Ay As Integer
-    Dim Left_x As Integer
-    Dim Right_x As Integer
-    Dim Top_y As Integer
-    Dim Bottom_y As Integer
-    Dim Hori_Squ_Thick_Max_X As Integer
-    Dim Hori_Squ_Thick_Max_Y As Integer
-    Dim Hori_Squ_Thick_Min_X As Integer
-    Dim Hori_Squ_Thick_Min_Y As Integer
-    Dim Hori_Blank_Space_X As Integer
-    Dim Hori_Blank_Space_Y As Integer
-    Dim Ali_x As Integer
-    Dim Ali_y As Integer
-
-    For Point_Num = 1 To Bottom_Ali_Points_Cnt
-
-    Call Get_Bottom_Ali_Point_Def(Point_Num, Ax, Ay)
-    Call Get_Point(Ax, Ay, Ax, Ay)
-    Call Get_Bottom_Ali_Search_Area(Ax, Ay, BmOmr.Height, BmOmr.Width, Left_x, Right_x, Top_y, Bottom_y, Hori_Squ_Thick_Max_X, Hori_Squ_Thick_Max_Y, Hori_Squ_Thick_Min_X, Hori_Squ_Thick_Min_Y, Hori_Blank_Space_X, Hori_Blank_Space_Y, Ans_Sheet_Type)
-
-            'Call Draw_Rectangle(BmOmr, Left_x, Right_x, Top_y, Bottom_y)
-
-    Get_Bottom_Ali_Positions = Get_Alignment_Point(BmOmr, False, Hori_Blank_Space_X, Hori_Blank_Space_Y, Hori_Squ_Thick_Max_X, Hori_Squ_Thick_Max_Y, Hori_Squ_Thick_Min_X, Hori_Squ_Thick_Min_Y, Left_x, Right_x, Top_y, Bottom_y, Ali_x, Ali_y)
-
-    Bottom_Ali_x(Point_Num) = Ali_x
-    Bottom_Ali_y(Point_Num) = Ali_y
-
-    If Get_Bottom_Ali_Positions = False Then
-    Exit For
-    End If
-
-    Next
-
-    End Function
-
-    Private Function Get_Right_Ali_Positions(ByRef BmOmr As Bitmap, _
-            ByRef Ans_Sheet_Type As Integer) As Boolean
-
-    Dim Point_Num As Integer
-    Dim Ax As Integer
-    Dim Ay As Integer
-    Dim Left_x As Integer
-    Dim Right_x As Integer
-    Dim Top_y As Integer
-    Dim Bottom_y As Integer
-    Dim Vert_Squ_Thick_Max_X As Integer
-    Dim Vert_Squ_Thick_Max_Y As Integer
-    Dim Vert_Squ_Thick_Min_X As Integer
-    Dim Vert_Squ_Thick_Min_Y As Integer
-    Dim Vert_Blank_Space_X As Integer
-    Dim Vert_Blank_Space_Y As Integer
-    Dim Ali_x As Integer
-    Dim Ali_y As Integer
-
-    For Point_Num = 1 To Right_Ali_Points_Cnt
-
-    Call Get_Right_Ali_Point_Def(Point_Num, Ax, Ay)
-    Call Get_Point(Ax, Ay, Ax, Ay)
-    Call Get_Right_Ali_Search_Area(Ax, Ay, BmOmr.Height, BmOmr.Width, Left_x, Right_x, Top_y, Bottom_y, Vert_Squ_Thick_Max_X, Vert_Squ_Thick_Max_Y, Vert_Squ_Thick_Min_X, Vert_Squ_Thick_Min_Y, Vert_Blank_Space_X, Vert_Blank_Space_Y, Ans_Sheet_Type)
-
-            'Call Draw_Rectangle(BmOmr, Left_x, Right_x, Top_y, Bottom_y)
-
-    Get_Right_Ali_Positions = Get_Alignment_Point(BmOmr, True, Vert_Blank_Space_Y, Vert_Blank_Space_X, Vert_Squ_Thick_Max_Y, Vert_Squ_Thick_Max_X, Vert_Squ_Thick_Min_Y, Vert_Squ_Thick_Min_X, Top_y, Bottom_y, Left_x, Right_x, Ali_y, Ali_x)
-
-    Right_Ali_x(Point_Num) = Ali_x
-    Right_Ali_y(Point_Num) = Ali_y
-
-    If Get_Right_Ali_Positions = False Then
-    Exit For
-    End If
-
-    Next
-
-    End Function
-
-    Private Sub Get_Right_Ali_Search_Area(ByVal Ax As Integer, ByVal Ay As Integer, _
-            ByVal Sheet_Hight As Integer, ByVal Sheet_Width As Integer, _
-                                                  ByRef Left_x As Integer, ByRef Right_x As Integer, _
-                                                  ByRef Top_y As Integer, ByRef Bottom_y As Integer, _
-                                                  ByRef Vert_Squ_Thick_Max_X As Integer, _
-                                                  ByRef Vert_Squ_Thick_Max_Y As Integer, _
-                                                  ByRef Vert_Squ_Thick_Min_X As Integer, _
-                                                  ByRef Vert_Squ_Thick_Min_Y As Integer, _
-                                                  ByRef Vert_Blank_Space_X As Integer, _
-                                                  ByRef Vert_Blank_Space_Y As Integer, _
-                                                  ByVal Ans_Sheet_Type As Integer)
-
-    Sheet_Hight -= 1
-    Sheet_Width -= 1
-
-            'Top Left Allignment Area
-    Left_x = Ax - (15 * XRatio)
-    Right_x = Ax + (15 * XRatio)
-    Top_y = Ay - (24 * YRatio_Right)
-    Bottom_y = Ay + (24 * YRatio_Right)
-
-    If Left_x < 0 Then Left_x = 0
-    If Right_x > Sheet_Width Then Right_x = Sheet_Width
-    If Top_y < 0 Then Top_y = 0
-    If Bottom_y > Sheet_Hight Then Bottom_y = Sheet_Hight
-
-            Vert_Blank_Space_X = Math.Round(XRatio * Squ_Blank_Space_Width_Wise)
-    Vert_Blank_Space_Y = Math.Round(YRatio_Right * Squ_Blank_Space_Length_Wise)
-
-    Vert_Squ_Thick_Max_X = Math.Round(XRatio * Squ_Thick * Squ_Thick_Max / 100)
-    Vert_Squ_Thick_Max_Y = Math.Round(YRatio_Right * Squ_Thick * Squ_Thick_Max / 100)
-
-    Vert_Squ_Thick_Min_X = Math.Round(XRatio * Squ_Thick * Squ_Thick_Min / 100)
-    Vert_Squ_Thick_Min_Y = Math.Round(YRatio_Right * Squ_Thick * Squ_Thick_Min / 100)
-
-    End Sub
-
-    Private Sub Get_Bottom_Ali_Search_Area(ByVal Ax As Integer, ByVal Ay As Integer, _
-            ByVal Sheet_Hight As Integer, ByVal Sheet_Width As Integer, _
-                                                   ByRef Left_x As Integer, ByRef Right_x As Integer, _
-                                                   ByRef Top_y As Integer, ByRef Bottom_y As Integer, _
-                                                   ByRef Hori_Squ_Thick_Max_X As Integer, _
-                                                   ByRef Hori_Squ_Thick_Max_Y As Integer, _
-                                                   ByRef Hori_Squ_Thick_Min_X As Integer, _
-                                                   ByRef Hori_Squ_Thick_Min_Y As Integer, _
-                                                   ByRef Hori_Blank_Space_X As Integer, _
-                                                   ByRef Hori_Blank_Space_Y As Integer, _
-                                                   ByVal Ans_Sheet_Type As Integer)
-
-    Sheet_Hight -= 1
-    Sheet_Width -= 1
-
-            'Top Left Allignment Area
-    Left_x = Ax - (24 * XRatio)
-    Right_x = Ax + (24 * XRatio)
-    Top_y = Ay + (15 * YRatio_Right) 'Top become bottom for scaning from bottom to top
-    Bottom_y = Ay - (15 * YRatio_Right)
-
-    If Left_x < 0 Then Left_x = 0
-    If Right_x > Sheet_Width Then Right_x = Sheet_Width
-    If Top_y < 0 Then Top_y = 0
-    If Bottom_y > Sheet_Hight Then Bottom_y = Sheet_Hight
-
-            Hori_Blank_Space_X = Math.Round(XRatio_Bottom * Squ_Blank_Space_Length_Wise)
-    Hori_Blank_Space_Y = Math.Round(YRatio * Squ_Blank_Space_Width_Wise)
-
-    Hori_Squ_Thick_Max_X = Math.Round(XRatio_Bottom * Squ_Thick * Squ_Thick_Max / 100)
-    Hori_Squ_Thick_Max_Y = Math.Round(YRatio * Squ_Thick * Squ_Thick_Max / 100)
-
-    Hori_Squ_Thick_Min_X = Math.Round(XRatio_Bottom * Squ_Thick * Squ_Thick_Min / 100)
-    Hori_Squ_Thick_Min_Y = Math.Round(YRatio * Squ_Thick * Squ_Thick_Min / 100)
-
-    End Sub
-
-
-
-
-
-
-    Private Function Detect_Alignment_Points(ByRef BmOmr As Bitmap, _
-            ByVal Swap_xy As Boolean, _
-                                                     ByVal Ali_Blank_Space_X As Integer, _
-                                                     ByVal Ali_Blank_Space_Y As Integer, _
-                                                     ByVal Ali_Squ_Thick_Max_X As Integer, _
-                                                     ByVal Ali_Squ_Thick_Max_Y As Integer, _
-                                                     ByVal Ali_Squ_Thick_Min_X As Integer, _
-                                                     ByVal Ali_Squ_Thick_Min_Y As Integer, _
-                                                     ByRef Left_x() As Integer, _
-    ByRef Right_x() As Integer, _
-    ByRef Top_y() As Integer, _
-    ByRef Bottom_y() As Integer, _
-    ByRef Ali_x() As Integer, _
-    ByRef Ali_y() As Integer) As Boolean
-
-    Dim i As SByte
-    Dim FTop_y As Integer
-    Dim FBottom_y As Integer
-    Dim FLeft_x As Integer
-    Dim FRight_x As Integer
-
-    For i = 1 To 4
-
-    Detect_Alignment_Points = False
-
-    If i = 1 Or i = 2 Then
-            FTop_y = Top_y(i)
-    FBottom_y = Bottom_y(i)
-    Else
-            FTop_y = Bottom_y(i)
-    FBottom_y = Top_y(i)
-    End If
-
-    If i = 1 Or i = 4 Then
-            FLeft_x = Left_x(i)
-    FRight_x = Right_x(i)
-    Else
-            FLeft_x = Right_x(i)
-    FRight_x = Left_x(i)
-    End If
-
-    Detect_Alignment_Points = Get_Alignment_Point(BmOmr, Swap_xy, Ali_Blank_Space_X, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_X, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_X, Ali_Squ_Thick_Min_Y, FLeft_x, FRight_x, FTop_y, FBottom_y, Ali_x(i), Ali_y(i))
-
-    If Detect_Alignment_Points = False Then Exit For
-
-            Next
-
-    End Function
-
-    Private Function Get_Alignment_Point(ByRef BmOmr As Bitmap, _
-            ByVal Swap_xy As Boolean, _
-                                                 ByVal Ali_Blank_Space_X As Integer, _
-                                                 ByVal Ali_Blank_Space_Y As Integer, _
-                                                 ByVal Ali_Squ_Thick_Max_X As Integer, _
-                                                 ByVal Ali_Squ_Thick_Max_Y As Integer, _
-                                                 ByVal Ali_Squ_Thick_Min_X As Integer, _
-                                                 ByVal Ali_Squ_Thick_Min_Y As Integer, _
-                                                 ByVal Left_x As Integer, ByVal Right_x As Integer, _
-                                                 ByVal Top_y As Integer, ByVal Bottom_y As Integer, _
-                                                 ByRef Ali_x As Integer, ByRef Ali_y As Integer) As Boolean
-
-    Dim Sy As Integer
-    Dim Step_y As Integer
-
-    Get_Alignment_Point = False
-
-    If Top_y <= Bottom_y Then
-    Step_y = 1
-    Else
-            Step_y = -1
-    End If
-
-    For Sy = Top_y To Bottom_y Step Step_y
-    If Find_X_Pattern(BmOmr, Swap_xy, Ali_Blank_Space_X, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_X, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_X, Ali_Squ_Thick_Min_Y, Sy, Left_x, Right_x, Top_y, Bottom_y, Ali_x, Ali_y) = True Then
-    Get_Alignment_Point = True
-    Exit For
-    End If
-    Next
-
-    End Function
-
-    Private Sub Rotate_Plane(ByRef Ali_x() As Integer, _
-    ByRef Ali_y() As Integer)
-
-    Dim i As SByte
-
-    Ali_x(0) = Ali_x(4)
-    Ali_y(0) = Ali_y(4)
-
-    For i = 4 To 1 Step -1
-    Ali_x(i) = Ali_x(i - 1)
-    Ali_y(i) = Ali_y(i - 1)
-    Next
-
-    End Sub
-
-    Private Function Find_X_Pattern(ByRef BmOmr As Bitmap, _
-            ByVal Swap_xy As Boolean, _
-                                            ByVal Ali_Blank_Space_X As Integer, _
-                                            ByVal Ali_Blank_Space_Y As Integer, _
-                                            ByRef Ali_Squ_Thick_Max_X As Integer, _
-                                            ByRef Ali_Squ_Thick_Max_Y As Integer, _
-                                            ByRef Ali_Squ_Thick_Min_X As Integer, _
-                                            ByRef Ali_Squ_Thick_Min_Y As Integer, _
-                                            ByVal y As Integer, _
-                                            ByVal Left_x As Integer, ByVal Right_x As Integer, _
-                                            ByVal Top_y As Integer, ByVal Bottom_y As Integer, _
-                                            ByRef Ali_x As Integer, _
-                                            ByRef Ali_y As Integer) As Boolean
-
-    Dim PixBri As Single
-    Dim Bri_Dar As Boolean
-    Dim First_Block As Boolean
-    Dim Second_Block As Boolean
-    Dim Third_Block As Boolean
-    Dim Block_Len As Integer
-    Dim x As Integer
-    Dim Mark_Start_x As Integer
-    Dim Mark_End_x As Integer
-    Dim Step_x As Integer
-
-    Find_X_Pattern = False
-            Block_Len = 0
-    First_Block = False
-            Second_Block = False
-    Third_Block = False
-
-    If Left_x <= Right_x Then
-    Step_x = 1
-    Else
-            Step_x = -1
-    End If
-
-    For x = Left_x To Right_x Step Step_x
-
-    If Swap_xy = False Then
-            PixBri = BmOmr.GetPixel(x, y).GetBrightness()
-    Else
-            PixBri = BmOmr.GetPixel(y, x).GetBrightness()
-    End If
-
-    If PixBri >= Ali_Bri_Level Then
-    Bri_Dar = True
-            Else
-    Bri_Dar = False
-    End If
-
-    If First_Block = False Then
-
-    If Bri_Dar = True Then
-    Block_Len += 1
-    Else
-
-    If Block_Len >= Ali_Blank_Space_X Then
-    First_Block = True
-            Mark_Start_x = x
-    Block_Len = 1
-    Else
-            Block_Len = 0
-    End If
-
-    End If
-
-    ElseIf Second_Block = False Then
-
-    If Bri_Dar = False Then
-    Block_Len += 1
-    Else
-
-    If Block_Len <= Ali_Squ_Thick_Max_X And Block_Len >= Ali_Squ_Thick_Min_X Then
-    Second_Block = True
-            Mark_End_x = x - 1
-    Block_Len = 1
-    Else
-            First_Block = False
-    Block_Len = 0
-    End If
-
-    End If
-
-    ElseIf Third_Block = False Then
-
-    If Bri_Dar = True Then
-
-    Block_Len += 1
-
-    If Block_Len >= Ali_Blank_Space_X Then
-
-    Third_Block = True
-
-    If Find_Y_Pattern(BmOmr, Swap_xy, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_Y, y, Top_y, Bottom_y, Mark_Start_x, Mark_End_x, Ali_y) = True Then
-    Ali_x = (Mark_Start_x + Mark_End_x) / 2
-    Return True
-    Else
-            First_Block = False
-    Second_Block = False
-            Third_Block = False
-    End If
-
-    End If
-
-    Else
-            First_Block = False
-    Second_Block = False
-            Block_Len = 0
-    End If
-
-    End If
-
-    Next
-
-    End Function
-
-    Private Sub Check_Y_Line(ByRef BmOmr As Bitmap, _
-            ByVal Swap_xy As Boolean, _
-                                     ByVal Sx As Integer, ByVal Sy As Integer, _
-                                     ByVal Top_y As Integer, ByVal Bottom_y As Integer, _
-                                     ByRef Top_Blank_Len As Integer, _
-                                     ByRef Mark_Len As Integer, _
-                                     ByRef Bottom_Blank_Len As Integer, _
-                                     ByRef Ali_y As Integer)
-
-    Dim Mark_Len_1 As Integer
-    Dim Mark_Len_2 As Integer
-    Dim Mark_End_1 As Integer
-    Dim Mark_End_2 As Integer
-
-    Call Check_Y_Line_Half(BmOmr, Swap_xy, Sx, Sy, Top_y, Mark_Len_1, Top_Blank_Len, Mark_End_1)
-    Call Check_Y_Line_Half(BmOmr, Swap_xy, Sx, Sy, Bottom_y, Mark_Len_2, Bottom_Blank_Len, Mark_End_2)
-    Mark_Len = Mark_Len_1 + Mark_Len_2 - 1
-    Ali_y = (Mark_End_1 + Mark_End_2) / 2
-
-    End Sub
-
-    Private Sub Check_Y_Line_Half(ByRef BmOmr As Bitmap, _
-            ByVal Swap_xy As Boolean, _
-                                          ByVal Sx As Integer, _
-                                          ByVal Start_y As Integer, ByVal Stop_y As Integer, _
-                                          ByRef Mark_Len As Integer, _
-                                          ByRef Blank_Len As Integer, _
-                                          ByRef Mark_End_y As Integer)
-
-    Dim y As Integer
-    Dim Step_y As Integer
-    Dim PixBri As Single
-    Dim Bri As Boolean
-    Dim Mark_Ok As Boolean
-
-    If Start_y <= Stop_y Then
-    Step_y = 1
-    Else
-            Step_y = -1
-    End If
-
-    Mark_Len = 0
-    Blank_Len = 0
-    Mark_Ok = False
-
-    For y = Start_y To Stop_y Step Step_y
-
-    If Swap_xy = False Then
-            PixBri = BmOmr.GetPixel(Sx, y).GetBrightness()
-    Else
-            PixBri = BmOmr.GetPixel(y, Sx).GetBrightness()
-    End If
-
-    If PixBri >= Ali_Bri_Level Then
-    Bri = True
-            Else
-    Bri = False
-    End If
-
-    If Bri = False Then
-
-    If Mark_Ok = True Then
-    Exit For
-    Else
-    Mark_Len += 1
-    End If
-
-    Else
-
-    If Mark_Ok = False Then
-            Mark_End_y = y - 1
-    Mark_Ok = True
-    End If
-
-    Blank_Len += 1
-
-    End If
-
-    Next
-
-    End Sub
-
-    Private Function Find_Y_Pattern(ByRef BmOmr As Bitmap, _
-            ByVal Swap_xy As Boolean, _
-                                            ByVal Ali_Blank_Space_Y As Integer, _
-                                            ByRef Ali_Squ_Thick_Max_Y As Integer, _
-                                            ByRef Ali_Squ_Thick_Min_Y As Integer, _
-                                            ByVal Sel_y As Integer, _
-                                            ByVal Top_y As Integer, ByVal Bottom_y As Integer, _
-                                            ByVal Mark_Start_x As Integer, ByVal Mark_End_x As Integer, _
-                                            ByRef Ali_y As Integer) As Boolean
-
-    Dim Mid_Mark_Start_x As Integer
-    Dim Mid_Mark_End_x As Integer
-
-    Mid_Mark_Start_x = Mark_Start_x
-            Mid_Mark_End_x = Mark_Start_x + (Mark_End_x - Mark_Start_x) / 2
-
-    Find_Y_Pattern = Find_Y_Pattern_Sub(BmOmr, Swap_xy, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_Y, Sel_y, Top_y, Bottom_y, Mid_Mark_Start_x, Mid_Mark_End_x, Ali_y)
-
-    If Find_Y_Pattern = False Then Exit Function
-
-            Mid_Mark_Start_x = Mid_Mark_End_x + Math.Sign(Mark_End_x - Mark_Start_x)
-    Mid_Mark_End_x = Mark_End_x
-
-            Find_Y_Pattern = Find_Y_Pattern_Sub(BmOmr, Swap_xy, Ali_Blank_Space_Y, Ali_Squ_Thick_Max_Y, Ali_Squ_Thick_Min_Y, Sel_y, Top_y, Bottom_y, Mid_Mark_Start_x, Mid_Mark_End_x, Ali_y)
-
-    End Function
-
-    Private Function Find_Y_Pattern_Sub(ByRef BmOmr As Bitmap, _
-            ByVal Swap_xy As Boolean, _
-                                                ByVal Ali_Blank_Space_Y As Integer, _
-                                                ByRef Ali_Squ_Thick_Max_Y As Integer, _
-                                                ByRef Ali_Squ_Thick_Min_Y As Integer, _
-                                                ByVal Sel_y As Integer, _
-                                                ByVal Top_y As Integer, ByVal Bottom_y As Integer, _
-                                                ByVal Mark_Start_x As Integer, ByVal Mark_End_x As Integer, _
-                                                ByRef Ali_y As Integer) As Boolean
-
-    Dim x As Integer
-    Dim Mark_Len As Integer
-    Dim Top_Blank_Len As Integer
-    Dim Bottom_Blank_Len As Integer
-    Dim Step_x As Integer
-
-    Find_Y_Pattern_Sub = False
-
-    If Mark_Start_x <= Mark_End_x Then
-    Step_x = 1
-    Else
-            Step_x = -1
-    End If
-
-    For x = Mark_Start_x To Mark_End_x Step Step_x
-
-    Call Check_Y_Line(BmOmr, Swap_xy, x, Sel_y, Top_y, Bottom_y, Top_Blank_Len, Mark_Len, Bottom_Blank_Len, Ali_y)
-
-    If Mark_Len <= Ali_Squ_Thick_Max_Y And Mark_Len >= Ali_Squ_Thick_Min_Y And Top_Blank_Len >= Ali_Blank_Space_Y And Bottom_Blank_Len >= Ali_Blank_Space_Y Then
-    Find_Y_Pattern_Sub = True
-    Exit For
-    End If
-
-    Next
-
-    End Function
 
     Public Sub New()
 
