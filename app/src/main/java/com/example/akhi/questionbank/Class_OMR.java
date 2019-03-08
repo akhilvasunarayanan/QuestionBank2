@@ -32,7 +32,7 @@ public class Class_OMR {
 
     private int Ali_Check_Tolerance = 5;
 
-    private int Ali_Bri_Level;
+    private double Ali_Bri_Level;
 
     public double Def_TL_x;
     public double Def_TL_y;
@@ -79,6 +79,29 @@ public class Class_OMR {
 
     public String[] OMR_Image_Formats = new String[6];
     public int OMR_Ans_Sheet_Count = 3;
+
+    public void Class_OMR() {
+
+        String Bri_Lev;
+
+        Bri_Lev = ""; //Get_Soft_Settings_From_File("Ali_Point_Brightness");
+
+        if (Bri_Lev == "") {
+            Ali_Bri_Level = 0.8; //0.6
+        } else {
+            Ali_Bri_Level = java.lang.Double.parseDouble(Bri_Lev);
+        }
+
+        OMR_Image_Formats[0] = "*.jpg";
+        OMR_Image_Formats[1] = "*.jpeg";
+        OMR_Image_Formats[2] = "*.bmp";
+        OMR_Image_Formats[3] = "*.tif";
+        OMR_Image_Formats[4] = "*.tiff";
+        OMR_Image_Formats[5] = "*.png";
+
+        //Letter_Pen.DashPattern = New Single() {3, 3}
+        //Letter_Pen.DashStyle = Drawing2D.DashStyle.Custom
+    }
 
     public class PointD {
 
@@ -1377,7 +1400,7 @@ public class Class_OMR {
             Step_y = -1;
         }
 
-        for (Sy = Top_y; Sy != Bottom_y; Sy += Step_y) {
+        for (Sy = Top_y; CheckLoop(Top_y, Bottom_y, Sy); Sy += Step_y) {
             if (Find_X_Pattern(BmOmr, Swap_xy, Ali_Blank_Space, Ali_Squ_Thick_Max, Ali_Squ_Thick_Min, Sy, Left_x, Right_x, Top_y, Bottom_y, Ali)) {
                 ret = true;
                 break;
@@ -1416,7 +1439,7 @@ public class Class_OMR {
             Step_x = -1;
         }
 
-        for (x = Left_x; x != Right_x; x += Step_x) {
+        for (x = Left_x; CheckLoop(Left_x,Right_x, x); x += Step_x) {
 
             if (!Swap_xy) {
                 PixBri = GetBrightness(BmOmr.getPixel(x, y));
@@ -1541,7 +1564,7 @@ public class Class_OMR {
             Step_x = -1;
         }
 
-        for (x = Mark_Start_x; x != Mark_End_x; x += Step_x) {
+        for (x = Mark_Start_x; CheckLoop(Mark_Start_x,Mark_End_x, x ); x += Step_x) {
 
             Check_Y_Line(BmOmr, Swap_xy, new Point(x, Sel_y), Top_y, Bottom_y, Ali, CYLPar);
 
@@ -1635,7 +1658,7 @@ public class Class_OMR {
         par.Blank_Len = 0;
         Mark_Ok = false;
 
-        for (y = Start_y; y != Stop_y; y += Step_y) {
+        for (y = Start_y; CheckLoop(Start_y, Stop_y, y); y += Step_y) {
 
             if (!Swap_xy) {
                 PixBri = GetBrightness(BmOmr.getPixel(Sx, y));
@@ -1920,51 +1943,8 @@ public class Class_OMR {
         Hori_Squ_Thick_Min.y = (int) java.lang.Math.round(YRatio * Squ_Thick * Squ_Thick_Min / 100);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    Public Sub New()
-
-    Dim Bri_Lev As String
-
-    Bri_Lev = Get_Soft_Settings_From_File("Ali_Point_Brightness")
-
-    If Bri_Lev = "" Then
-            Ali_Bri_Level = 0.8 ' 0.6
-    Else
-            Ali_Bri_Level = Val(Bri_Lev)
-    End If
-
-    OMR_Image_Formats(0) = "*.jpg"
-    OMR_Image_Formats(1) = "*.jpeg"
-    OMR_Image_Formats(2) = "*.bmp"
-    OMR_Image_Formats(3) = "*.tif"
-    OMR_Image_Formats(4) = "*.tiff"
-    OMR_Image_Formats(5) = "*.png"
-
-    Letter_Pen.DashPattern = New Single() {3, 3}
-    Letter_Pen.DashStyle = Drawing2D.DashStyle.Custom
-
-    End Sub
-
+    //region Create_OMR_Ans_Sheet
+    /*
     Public Function Create_OMR_Ans_Sheet(ByVal Ans_Sheet_Code As Integer, ByRef BmOmr As Bitmap) As Graphics
 
     Dim GrOmr As Graphics
@@ -1998,7 +1978,10 @@ public class Class_OMR {
     Create_OMR_Ans_Sheet = GrOmr
 
     End Function
+    */
+    //endregion
 
+    /*
     Public Function Get_Omr_Ans_Sheet(ByVal Ans_Sheet_Code As Integer) As Bitmap
 
     Dim GrOmr As Graphics
@@ -2503,103 +2486,94 @@ public class Class_OMR {
         e.DrawString("TOTAL MARK", PrintFont, Brushes.Black, Offset + Dx, Mark_Col_Top + CInt(72 * YRatio))
 
     End Sub
+    */
 
-    Public Sub Get_All_Bubble_Mark(ByVal Tot_Question As Integer, _
-            ByRef BmOmr As Bitmap, _
-                                           ByRef Digit_Mark(,) As Boolean, _
-    ByRef Answer_Mark(,) As Boolean)
+    public void Get_All_Bubble_Mark(int Tot_Question, Bitmap BmOmr, boolean[][] Digit_Mark, boolean[][] Answer_Mark) {
 
-    Dim Digit_Bri(4, 10) As Double 'Digit Place, Digit Count
-    Dim Answer_Bri(-1, -1) As Double 'Tot Qu, Choice
-    Dim Brightness_Level As Double
-    Dim Digit_Place As Integer
-    Dim Digit_Cnt As Integer
-    Dim Qu_Num As Integer
-    Dim Choice As Integer
+        double[][] Digit_Bri = new double[5][11]; //Digit Place, Digit Count
+        double[][] Answer_Bri; //Tot Qu, Choice
+        double Brightness_Level;
+        int Digit_Place;
+        int Digit_Cnt;
+        int Qu_Num;
+        int Choice;
 
-    Call Get_All_Bubble_Brightness(Tot_Question, BmOmr, Digit_Bri, Answer_Bri, Brightness_Level)
+        Brightness_Level = Get_All_Bubble_Brightness(Tot_Question, BmOmr, Digit_Bri, Answer_Bri);
 
-    ReDim Answer_Mark(Tot_Question, 5)
+        Answer_Mark = new boolean[Tot_Question + 1][6];
 
-    For Digit_Place = 1 To 4
-    For Digit_Cnt = 1 To 10
+        for (Digit_Place = 1; Digit_Place <= 4; Digit_Place++) {
+            for (Digit_Cnt = 1; Digit_Cnt <= 10; Digit_Cnt++) {
 
-    If Digit_Bri(Digit_Place, Digit_Cnt) < Brightness_Level Then
-    Digit_Mark(Digit_Place, Digit_Cnt) = True
-            Else
-    Digit_Mark(Digit_Place, Digit_Cnt) = False
-    End If
+                if (Digit_Bri[Digit_Place][Digit_Cnt] < Brightness_Level) {
+                    Digit_Mark[Digit_Place][Digit_Cnt] = true;
+                } else {
+                    Digit_Mark[Digit_Place][Digit_Cnt] = false;
+                }
 
-    Next
-            Next
+            }
+        }
 
-    For Qu_Num = 1 To Tot_Question
-    For Choice = 1 To Total_Choice
+        for (Qu_Num = 1; Qu_Num <= Tot_Question; Qu_Num++) {
+            for (Choice = 1; Choice <= Total_Choice; Choice++) {
 
-    If Answer_Bri(Qu_Num, Choice) < Brightness_Level Then
-    Answer_Mark(Qu_Num, Choice) = True
-            Else
-    Answer_Mark(Qu_Num, Choice) = False
-    End If
+                if (Answer_Bri[Qu_Num][Choice] < Brightness_Level) {
+                    Answer_Mark[Qu_Num][Choice] = true;
+                } else {
+                    Answer_Mark[Qu_Num][Choice] = false;
+                }
+            }
+        }
+    }
 
-    Next
-            Next
+    public double Get_All_Bubble_Brightness(int Tot_Question , Bitmap BmOmr, double Digit_Bri[][], double Answer_Bri[][]) {
 
-    End Sub
+        int Digit_Place;
+        int Digit_Cnt;
+        int Qu_Num;
+        int Choice;
+        double Max_Bri = -100;
+        double Min_Bri = 100;
+        double Brightness_Level;
 
-    Public Sub Get_All_Bubble_Brightness(ByVal Tot_Question As Integer, _
-            ByRef BmOmr As Bitmap, _
-                                                 ByRef Digit_Bri(,) As Double, _
-    ByRef Answer_Bri(,) As Double, _
-    ByRef Brightness_Level As Double)
+        Answer_Bri = new double[Tot_Question + 1][6];
 
-    Dim Digit_Place As Integer
-    Dim Digit_Cnt As Integer
-    Dim Qu_Num As Integer
-    Dim Choice As Integer
-    Dim Max_Bri As Double = -100
-    Dim Min_Bri As Double = 100
+        for (Digit_Place = 1; Digit_Place <= 4; Digit_Place++) {
+            for (Digit_Cnt = 1; Digit_Cnt <= 10; Digit_Cnt++) {
 
-    ReDim Answer_Bri(Tot_Question, 5)
+                Digit_Bri[Digit_Place][Digit_Cnt] = Get_RollNo_Mark_Brightness(BmOmr, Digit_Cnt, Digit_Place);
 
-    For Digit_Place = 1 To 4
-    For Digit_Cnt = 1 To 10
+                if (Digit_Bri[Digit_Place][Digit_Cnt] > Max_Bri) {
+                    Max_Bri = Digit_Bri[Digit_Place][Digit_Cnt];
+                }
 
-    Digit_Bri(Digit_Place, Digit_Cnt) = Get_RollNo_Mark_Brightness(BmOmr, Digit_Cnt, Digit_Place)
+                if (Digit_Bri[Digit_Place][Digit_Cnt] < Min_Bri) {
+                    Min_Bri = Digit_Bri[Digit_Place][Digit_Cnt]
+                }
+            }
+        }
 
-    If Digit_Bri(Digit_Place, Digit_Cnt) > Max_Bri Then
-    Max_Bri = Digit_Bri(Digit_Place, Digit_Cnt)
-    End If
+        for (Qu_Num = 1; Qu_Num <= Tot_Question; Qu_Num++) {
+            for (Choice = 1; Choice <= Total_Choice; Choice++) {
 
-    If Digit_Bri(Digit_Place, Digit_Cnt) < Min_Bri Then
-            Min_Bri = Digit_Bri(Digit_Place, Digit_Cnt)
-    End If
+                Answer_Bri[Qu_Num][Choice] = Get_Ans_Bubble_Mark_Brightness(BmOmr, Qu_Num, Choice);
 
-    Next
-            Next
+                if (Answer_Bri[Qu_Num][Choice] > Max_Bri) {
+                    Max_Bri = Answer_Bri[Qu_Num][Choice];
+                }
 
-    For Qu_Num = 1 To Tot_Question
-    For Choice = 1 To Total_Choice
+                if (Answer_Bri[Qu_Num][Choice] < Min_Bri) {
+                    Min_Bri = Answer_Bri[Qu_Num][Choice];
+                }
+            }
+        }
 
-    Answer_Bri(Qu_Num, Choice) = Get_Ans_Bubble_Mark_Brightness(BmOmr, Qu_Num, Choice)
+        if ((Max_Bri - Min_Bri) < 0.2) {
+            Brightness_Level = 0.5;
+        } else {
+            Brightness_Level = (Max_Bri + Min_Bri) / 2.0;
+        }
 
-    If Answer_Bri(Qu_Num, Choice) > Max_Bri Then
-    Max_Bri = Answer_Bri(Qu_Num, Choice)
-    End If
-
-    If Answer_Bri(Qu_Num, Choice) < Min_Bri Then
-            Min_Bri = Answer_Bri(Qu_Num, Choice)
-    End If
-
-    Next
-            Next
-
-    If (Max_Bri - Min_Bri) < 0.2 Then
-            Brightness_Level = 0.5
-    Else
-            Brightness_Level = (Max_Bri + Min_Bri) / 2.0
-    End If
-
-    End Sub
-
+        return Brightness_Level;
+    }
 }
