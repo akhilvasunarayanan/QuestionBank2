@@ -7,20 +7,51 @@
     tools:context=".Evaluate">
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/btnCapture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="Take a Photo" >
-    </Button>
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Capture"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextEvaluateTotalMark"></Button>
 
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_above="@+id/button1"
-        android:layout_alignParentTop="true">
-    </ImageView>
+        android:layout_height="235dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></ImageView>
+
+    <TextView
+        android:id="@+id/textViewEvaluateTotalMark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:text="Total Mark : "
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextEvaluateTotalMark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/editTextEvaluateTotalMark" />
+
+    <EditText
+        android:id="@+id/editTextEvaluateTotalMark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:paddingTop="4dp"
+        android:text="0"
+        android:textSize="18sp"
+        app:layout_constraintStart_toEndOf="@+id/textViewEvaluateTotalMark"
+        app:layout_constraintTop_toBottomOf="@+id/imageView1" />
 
 </android.support.constraint.ConstraintLayout>

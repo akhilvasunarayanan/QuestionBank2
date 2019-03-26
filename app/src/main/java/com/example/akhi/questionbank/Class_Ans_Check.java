@@ -1,223 +1,205 @@
 package com.example.akhi.questionbank;
 
 import android.graphics.Bitmap;
+import android.graphics.Point;
 
 public class Class_Ans_Check {
 
-    public int[] Ans_Key;
+    public int Ans_Key[];
     public int Tot_Question;
     public double Right_Ans_Mark;
     public double Wrong_Ans_Mark;
 
-    public class Ans_Sheet_Result{
-        ByRef Reg_Last_Digits As Integer, _
-        ByRef Attented_Qu As Integer, _
-        ByRef Right_Ans As Integer, _
-        ByRef Total_Mark As Single, _
-        ByRef ReCheck As Boolean, _
-    }
-
     public String Get_Ans_Sheet_Result(Bitmap BmOmr,
                                        Class_OMR ClsOmr,
-                                                 ByVal Ans_Sheet_Type As Integer) As String
+                                       int[] Reg_Last_Digits,
+                                       int[] Attented_Qu,
+                                       int[] Right_Ans,
+                                       double[] Total_Mark,
+                                       boolean[] ReCheck,
+                                       int Ans_Sheet_Type) {
 
+        Point[] Ali = new Point[5];
+        int Digit_Cnt;
+        int Digit_Place;
+        int Digit_Mark_Cnt;
+        int Mark_Digit;
+        int Qu_Num;
+        int Choice;
+        int Ans_Cnt;
+        int Ans_Choice = 0;
+        String Ans_Sheet_Result;
 
-    Dim Left_x(4) As Integer
-    Dim Right_x(4) As Integer
-    Dim Top_y(4) As Integer
-    Dim Bottom_y(4) As Integer
+        boolean[][] Digit_Mark = new boolean[5][11]; //Digit Place, Digit Count
+        boolean[][] Answer_Mark = new boolean[0][0]; //Tot Qu, Choice
 
-    Dim Ali_x(4) As Integer
-    Dim Ali_y(4) As Integer
+        Ans_Sheet_Result = "";
 
-    Dim Digit_Cnt As SByte
-    Dim Digit_Place As SByte
-    Dim Digit_Mark_Cnt As SByte
-    Dim Mark_Digit As SByte
-    Dim Qu_Num As Integer
-    Dim Choice As SByte
-    Dim Ans_Cnt As Byte
-    Dim Ans_Choice As Byte
+        if (!ClsOmr.Alignment_Detect(BmOmr, Ali, Ans_Sheet_Type)) {
+            Ans_Sheet_Result = "Alignment Error";
+            return Ans_Sheet_Result;
+        }
 
-    Dim Digit_Mark(4, 10) As Boolean 'Digit Place, Digit Count
-    Dim Answer_Mark(-1, -1) As Boolean 'Tot Qu, Choice
+        ClsOmr.Get_All_Bubble_Mark(Tot_Question, BmOmr, Digit_Mark, Answer_Mark);
 
-    Get_Ans_Sheet_Result = ""
+        //Get Reg. Num.
 
-    Try
-            BmOmr = New Bitmap(File_Name)
-    Catch ex As Exception
-    ReCheck = True
-            Get_Ans_Sheet_Result = "File Access Error"
-    Exit Function
-    End Try
+        Reg_Last_Digits[0] = 0;
 
-    If ClsOmr.Alignment_Detect(BmOmr, Ali_x, Ali_y, Ans_Sheet_Type) = False Then
-    Get_Ans_Sheet_Result = "Alignment Error"
-            BmOmr.Dispose()
-    Exit Function
-    End If
+        for (Digit_Place = 1; Digit_Place <= 4; Digit_Place++) {
+            Digit_Mark_Cnt = 0;
+            Mark_Digit = 0;
 
-    Call ClsOmr.Get_All_Bubble_Mark(Tot_Question, BmOmr, Digit_Mark, Answer_Mark)
+            for (Digit_Cnt = 1; Digit_Cnt <= 10; Digit_Cnt++) {
+                if (Digit_Mark[Digit_Place][Digit_Cnt]) {
+                    Digit_Mark_Cnt += 1;
+                    Mark_Digit = Digit_Cnt - 1;
+                }
+            }
 
-        'Get Reg. Num.
+            if (Digit_Mark_Cnt == 1) {
+                Reg_Last_Digits[0] = Reg_Last_Digits[0] + Mark_Digit * (10 ^ (4 - Digit_Place));
+            } else {
+                Ans_Sheet_Result = "Reg. Number Error";
+                return Ans_Sheet_Result;
+            }
+        }
 
-    Reg_Last_Digits = 0
+        Attented_Qu[0] = 0;
+        Right_Ans[0] = 0;
 
-    For Digit_Place = 1 To 4
+        for (Qu_Num = 1; Qu_Num <= Tot_Question; Qu_Num++) {
 
-    Digit_Mark_Cnt = 0
-    Mark_Digit = 0
+            Ans_Cnt = 0;
 
-    For Digit_Cnt = 1 To 10
-    If Digit_Mark(Digit_Place, Digit_Cnt) = True Then
-    Digit_Mark_Cnt += 1
-    Mark_Digit = Digit_Cnt - 1
-    End If
+            for (Choice = 1; Choice <= ClsOmr.Total_Choice; Choice++) {
+                if (Answer_Mark[Qu_Num][Choice]) {
+                    Ans_Cnt += 1;
+                    Ans_Choice = Choice;
+                }
+            }
+
+            if (Ans_Choice > 0 && Ans_Key[Qu_Num] == Ans_Choice && Ans_Cnt == 1) {
+                Right_Ans[0] += 1;
+            }
+
+            if (Ans_Cnt > 0) {
+                Attented_Qu[0] += 1;
+            }
+        }
+
+        Total_Mark[0] = (Right_Ans[0] * Right_Ans_Mark) - ((Attented_Qu[0] - Right_Ans[0]) * java.lang.Math.abs(Wrong_Ans_Mark));
+
+        if (Total_Mark[0] < 0) Total_Mark[0] = 0;
+
+        return Ans_Sheet_Result;
+    }
+
+    //region Get_QB_Answer_Key
+    /*
+    public void Get_QB_Answer_Key(int[] Answer_Key, ByRef DsQb As DataSet)
+
+    Dim DrQb As OleDb.OleDbDataReader
+    Dim CmdQb As OleDb.OleDbCommand
+    Dim Row_Num As Integer
+    Dim i As SByte
+    Dim Question_Code As Integer
+    Dim Option_Num As SByte
+    Dim Answer_Option As SByte
+    Dim Rtb_DB_Answer(5) As RichTextBox
+    Dim Choice_Pos As SByte
+    Dim Multiple_Choice As Boolean
+
+    If Tot_Question <= 0 Then Exit Sub
+
+    For i = 0 To 5
+    Rtb_DB_Answer(i) = New RichTextBox
     Next
 
-    If Digit_Mark_Cnt = 1 Then
-            Reg_Last_Digits = Reg_Last_Digits + Mark_Digit * (10 ^ (4 - Digit_Place))
-    Else
-            Get_Ans_Sheet_Result = "Reg. Number Error"
-    Exit For
-    End If
+    ReDim Answer_Key(Tot_Question)
 
-    Next
+    For Row_Num = 0 To (DsQb.Tables("Exam_Questions").Rows.Count - 1)
 
-            Attented_Qu = 0
-    Right_Ans = 0
+    Question_Code = DsQb.Tables("Exam_Questions").Rows(Row_Num).Item("Question_Code")
 
-    For Qu_Num = 1 To Tot_Question
+    CmdQb = New OleDb.OleDbCommand("Select * from Question_Bank Where Question_Code = " & Question_Code, ConnQB)
 
-    Ans_Cnt = 0
+    DrQb = CmdQb.ExecuteReader()
+            DrQb.Read()
 
-    For Choice = 1 To ClsOmr.Total_Choice
-    If Answer_Mark(Qu_Num, Choice) = True Then
-    Ans_Cnt += 1
-    Ans_Choice = Choice
-    End If
-    Next
+    If DrQb.HasRows Then
 
-    If Ans_Choice > 0 And Ans_Key(Qu_Num) = Ans_Choice And Ans_Cnt = 1 Then
-    Right_Ans += 1
-    End If
-
-    If Ans_Cnt > 0 Then
-    Attented_Qu += 1
-    End If
-
-    Next
-
-            Total_Mark = (Right_Ans * Right_Ans_Mark) - ((Attented_Qu - Right_Ans) * Math.Abs(Wrong_Ans_Mark))
-
-    If Total_Mark < 0 Then Total_Mark = 0
-
-        BmOmr.Dispose()
-
-    End Function
-
-    Public Sub Get_QB_Answer_Key(ByRef Answer_Key() As Byte, ByRef DsQb As DataSet)
-
-    {
-        Dim DrQb As OleDb.OleDbDataReader
-        Dim CmdQb As OleDb.OleDbCommand
-        Dim Row_Num As Integer
-        Dim i As SByte
-        Dim Question_Code As Integer
-        Dim Option_Num As SByte
-        Dim Answer_Option As SByte
-        Dim Rtb_DB_Answer (5) As RichTextBox
-        Dim Choice_Pos As SByte
-        Dim Multiple_Choice As Boolean
-
-        If Tot_Question <=0 Then Exit Sub
-
-        For i = 0 To 5
-        Rtb_DB_Answer(i) = New RichTextBox
-            Next
-
-        ReDim Answer_Key (Tot_Question)
-
-            For Row_Num = 0 To(DsQb.Tables("Exam_Questions").Rows.Count - 1)
-
-        Question_Code = DsQb.Tables("Exam_Questions").Rows(Row_Num).Item("Question_Code")
-
-        CmdQb = New
-        OleDb.OleDbCommand("Select * from Question_Bank Where Question_Code = " & Question_Code, ConnQB)
-
-        DrQb = CmdQb.ExecuteReader()
-        DrQb.Read()
-
-        If DrQb.HasRows Then
-
-        If IsDBNull (DrQb.Item("Multiple_Choice")) Then
+    If IsDBNull(DrQb.Item("Multiple_Choice")) Then
             Multiple_Choice = True
-        Else
-                Multiple_Choice = IIf(DrQb.Item("Multiple_Choice") = 1, True, False)
-        End If
+    Else
+            Multiple_Choice = IIf(DrQb.Item("Multiple_Choice") = 1, True, False)
+    End If
 
-        If Multiple_Choice Then
+    If Multiple_Choice Then
 
-        Call QuestionBank.Get_Qb_Answer_Only(Question_Code, Rtb_DB_Answer)
+    Call QuestionBank.Get_Qb_Answer_Only(Question_Code, Rtb_DB_Answer)
 
-        Choice_Pos = 0
-        Answer_Option = 0
+    Choice_Pos = 0
+    Answer_Option = 0
 
-        For i = 1 To 5
+    For i = 1 To 5
 
-        Option_Num = DsQb.Tables("Exam_Questions").Rows(Row_Num).Item("Option_" & i)
+    Option_Num = DsQb.Tables("Exam_Questions").Rows(Row_Num).Item("Option_" & i)
 
-        If Rtb_DB_Answer (Option_Num).TextLength <>0 Then
+    If Rtb_DB_Answer(Option_Num).TextLength <> 0 Then
 
             Choice_Pos = Choice_Pos + 1
 
-        If Option_Num = DrQb.Item("Choice_Answer") Then
+    If Option_Num = DrQb.Item("Choice_Answer") Then
             Answer_Option = Choice_Pos
-        Exit For
-        End If
+    Exit For
+    End If
 
-        End If
+    End If
 
-        Next i
+    Next i
 
-        Answer_Key(Row_Num + 1) = Answer_Option
+    Answer_Key(Row_Num + 1) = Answer_Option
 
-        Else
-        Answer_Key(Row_Num + 1) = 0
-        End If
+            Else
+    Answer_Key(Row_Num + 1) = 0
+    End If
 
-        DrQb.Close()
+                DrQb.Close()
 
-        End If
+    End If
 
-        Next Row_Num
+    Next Row_Num
 
-        End Sub
+    End Sub
+    */
+    //endregion
 
-        Public Sub Get_User_Ans_Key(ByRef Answer_Key()As Byte, ByVal Exam_Code As Integer)
+    //region Get_User_Ans_Key
+    /*
+    Public Sub Get_User_Ans_Key(ByRef Answer_Key() As Byte, ByVal Exam_Code As Integer)
 
-        Dim DaQb As New MySqlDataAdapter
-        Dim DsQb As New DataSet
-        Dim i As Integer
+    Dim DaQb As New MySqlDataAdapter
+    Dim DsQb As New DataSet
+    Dim i As Integer
 
-        If Tot_Question <=0 Then Exit Sub
+    If Tot_Question <= 0 Then Exit Sub
 
-        ReDim Answer_Key (Tot_Question)
+    ReDim Answer_Key(Tot_Question)
 
-            DaQb.SelectCommand = New
-        MySqlCommand("Select * from User_Answer_Key Where Exam_Code = " & Exam_Code, ConnMySQL)
+    DaQb.SelectCommand = New MySqlCommand("Select * from User_Answer_Key Where Exam_Code = " & Exam_Code, ConnMySQL)
         DsQb.Clear()
-        DaQb.Fill(DsQb, "User_Answer_Key")
+                DaQb.Fill(DsQb, "User_Answer_Key")
 
-        For i = 0 To DsQb.Tables("User_Answer_Key").Rows.Count - 1
+    For i = 0 To DsQb.Tables("User_Answer_Key").Rows.Count - 1
 
-        If DsQb.Tables("User_Answer_Key").Rows(i).Item("Question_Num") <= Tot_Question Then
-        Answer_Key(DsQb.Tables("User_Answer_Key").Rows(i).Item("Question_Num")) = DsQb.Tables("User_Answer_Key").Rows(i).Item("Choice_Answer")
-        End If
+    If DsQb.Tables("User_Answer_Key").Rows(i).Item("Question_Num") <= Tot_Question Then
+    Answer_Key(DsQb.Tables("User_Answer_Key").Rows(i).Item("Question_Num")) = DsQb.Tables("User_Answer_Key").Rows(i).Item("Choice_Answer")
+    End If
 
-        Next
+    Next
 
-    }
-
+    End Sub
+    */
+    //endregion
 }
