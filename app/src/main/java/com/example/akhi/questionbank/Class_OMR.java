@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.support.v4.graphics.ColorUtils;
+import android.util.Log;
 
 public class Class_OMR {
 
@@ -68,7 +69,7 @@ public class Class_OMR {
     public String[] OMR_Image_Formats = new String[6];
     public int OMR_Ans_Sheet_Count = 3;
 
-    public void Class_OMR() {
+    public Class_OMR() {
 
         String Bri_Lev;
 
@@ -312,16 +313,16 @@ public class Class_OMR {
         int Ans_Sheet_Questions_Return = 0;
         if (Ans_Sheet_Type == 1) {
             Ans_Sheet_Questions_Return = 60;
-            Total_Choice = 5;
-            Total_Column = 2;
+            ASQuestions.Total_Choice = 5;
+            ASQuestions.Total_Column = 2;
         } else if (Ans_Sheet_Type == 2) {
             Ans_Sheet_Questions_Return = 120;
-            Total_Choice = 5;
-            Total_Column = 2;
+            ASQuestions.Total_Choice = 5;
+            ASQuestions.Total_Column = 2;
         } else if (Ans_Sheet_Type == 3) {
             Ans_Sheet_Questions_Return = 180;
-            Total_Choice = 4;
-            Total_Column = 3;
+            ASQuestions.Total_Choice = 4;
+            ASQuestions.Total_Column = 3;
         } else {
             Ans_Sheet_Questions_Return = 0;
             //MsgBox("Answer Sheet Type Error", MsgBoxStyle.Critical)
@@ -790,6 +791,8 @@ public class Class_OMR {
         Lm = BR.x - Bf.x;
 
         Tf = Section_Formula(new PointD(TL), new PointD(TR), Ll, Lm);
+
+        the above code wil fail. TF object will not act as call by ref. a new object will be created
     }
 
     private PointD Section_Formula(PointD _A, PointD _B, double _l, double _m) {
@@ -800,6 +803,7 @@ public class Class_OMR {
 
         rP.x = ((_l * B.x) + (_m * A.x)) / (_l + _m);
         rP.y = ((_l * B.y) + (_m * A.y)) / (_l + _m);
+
         return rP;
     }
 
@@ -873,7 +877,6 @@ public class Class_OMR {
         rP.y = -Mid_Ali_Shift;
 
         Bottom_Ali_Len = (int) java.lang.Math.round((Def_BR.x - Def_BL.x) / (Bottom_Ali_Points_Cnt + 1));
-
         rP.x += (Bottom_Ali_Len * Point_Num);
 
         return rP;
@@ -888,6 +891,7 @@ public class Class_OMR {
         PointD Rf = new PointD();
 
         Get_Vertical_Line(In, Tf, Bf);
+        Log.d("xxxxxxxxxxxxxxx 2", "Test Tf:  x=" + Tf.x + ", y=" + Tf.y);
         Get_Horizontal_Line(In, Lf, Rf);
 
         return Get_Intersection_Of_Two_Line_A_And_B(new Point(Lf.ToPoint()), new Point(Rf.ToPoint()), new Point(Bf.ToPoint()), new Point(Tf.ToPoint()));
@@ -940,8 +944,13 @@ public class Class_OMR {
         Bl = In.x;
         Bm = Def_BR.x - Def_BL.x - In.x;
 
-        Tf = Section_Formula(new PointD(TL), new PointD(TR), Tl, Tm);
-        Bf = Section_Formula(new PointD(BL), new PointD(BR), Bl, Bm);
+        PointD _Tf = Section_Formula(new PointD(TL), new PointD(TR), Tl, Tm);
+        Tf.x = _Tf.x;
+        Tf.y = _Tf.y;
+
+        PointD _Bf = Section_Formula(new PointD(BL), new PointD(BR), Bl, Bm);
+        Bf.x = _Bf.x;
+        Bf.y = _Bf.y;
     }
 
     public Point Get_Intersection_Of_Two_Line_A_And_B(Point _A1, Point _A2, Point _B1, Point _B2) {
@@ -1184,9 +1193,10 @@ public class Class_OMR {
     }
 
     private double GetBrightness(int color) {
-
         float[] hsl = new float[3];
         ColorUtils.colorToHSL(color, hsl);
+        //double tst = (double) hsl[2];
+        //Log.d("xxxxxxxxxxxxxxx", "Test:  " + hsl[0] + ", " + hsl[1] + ", " + hsl[2] + ", " + tst);
         return (double) hsl[2];
     }
 
@@ -1238,6 +1248,8 @@ public class Class_OMR {
         Omr_Bubble_Width = (int) java.lang.Math.round(Bubble_Width * Ratio.x);
         Omr_Bubble_Height = (int) java.lang.Math.round(Bubble_Height * Ratio.y);
 
+        Log.d("xxxxxxxxxxxxxxx", "Test:  " +  A.x + ", " + Squ_Thick);
+
         for (x = A.x - (Squ_Thick / 2); x <= (A.x + (Squ_Thick / 2)); x++) {
             for (y = (A.y - (Squ_Thick / 2)); y <= (A.y + (Squ_Thick / 2)); y++) {
                 Tot_Bri += GetBrightness(BmOmr.getPixel(x, y));
@@ -1266,6 +1278,7 @@ public class Class_OMR {
         for (i = 1; i <= Bottom_Ali_Points_Cnt; i++) {
             A = Get_Bottom_Ali_Point_Def(i);
             A = Get_Point(new PointD(A));
+            Log.d("xxxxxxxxxxxxxxx", "Test:  x = " + A.x + ", y=" + A.y);
             ret = Get_Ali_Rotation_Mark(BmOmr, A);
             if (ret.Ali_Rotation_Mark == false) break;
         }

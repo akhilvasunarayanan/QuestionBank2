@@ -2,6 +2,7 @@ package com.example.akhi.questionbank;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.util.Log;
 
 public class Class_Ans_Check {
 
@@ -30,6 +31,10 @@ public class Class_Ans_Check {
         int Ans_Choice = 0;
         String Ans_Sheet_Result;
 
+        for (int i = 0; i <= 4; i++){
+            Ali[i] = new Point(0,0);
+        }
+
         boolean[][] Digit_Mark = new boolean[5][11]; //Digit Place, Digit Count
         boolean[][] Answer_Mark = new boolean[0][0]; //Tot Qu, Choice
 
@@ -37,6 +42,7 @@ public class Class_Ans_Check {
 
         if (!ClsOmr.Alignment_Detect(BmOmr, Ali, Ans_Sheet_Type)) {
             Ans_Sheet_Result = "Alignment Error";
+            Log.d("Error", Ans_Sheet_Result);
             return Ans_Sheet_Result;
         }
 
