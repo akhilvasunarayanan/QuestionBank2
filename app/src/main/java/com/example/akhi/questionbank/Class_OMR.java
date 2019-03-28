@@ -189,14 +189,14 @@ public class Class_OMR {
 
         Right_Ali = new Point[Right_Ali_Points_Cnt + 1];
 
-        for (Point rP : Right_Ali) {
-            rP = new Point(0, 0);
+        for (int i = 0; i<=Right_Ali_Points_Cnt; i++) {
+            Right_Ali[i] = new Point(0, 0);
         }
 
         Bottom_Ali = new Point[Bottom_Ali_Points_Cnt + 1];
 
-        for (Point bP : Bottom_Ali) {
-            bP = new Point(0, 0);
+        for (int i = 0; i<=Bottom_Ali_Points_Cnt; i++) {
+            Bottom_Ali[i] = new Point(0, 0);
         }
     }
 
@@ -782,17 +782,16 @@ public class Class_OMR {
         double Ll; //Section Formula ' l' at Left
         double Lm; //Section Formula ' m' at Left
 
-        Bottom_Point bPoint = new Bottom_Point((int) java.lang.Math.round(Bf.x), (int) java.lang.Math.round(Bf.y));
-        Bf = new PointD(Get_Bottom_Point(In.x));
-        Bf.x = bPoint.Bx;
-        Bf.y = bPoint.By;
+        PointD _Bf = new PointD(Get_Bottom_Point(In.x));
+        Bf.x = _Bf.x;
+        Bf.y = _Bf.y;
 
         Ll = Bf.x - BL.x;
         Lm = BR.x - Bf.x;
 
-        Tf = Section_Formula(new PointD(TL), new PointD(TR), Ll, Lm);
-
-        the above code wil fail. TF object will not act as call by ref. a new object will be created
+        PointD _Tf = Section_Formula(new PointD(TL), new PointD(TR), Ll, Lm);
+        Tf.x = _Tf.x;
+        Tf.y = _Tf.y;
     }
 
     private PointD Section_Formula(PointD _A, PointD _B, double _l, double _m) {
@@ -805,16 +804,6 @@ public class Class_OMR {
         rP.y = ((_l * B.y) + (_m * A.y)) / (_l + _m);
 
         return rP;
-    }
-
-    private class Bottom_Point {
-        int Bx;
-        int By;
-
-        public Bottom_Point(int _Bx, int _By) {
-            this.Bx = _Bx;
-            this.By = _By;
-        }
     }
 
     private Point Get_Bottom_Point(double In_x) {
@@ -891,25 +880,9 @@ public class Class_OMR {
         PointD Rf = new PointD();
 
         Get_Vertical_Line(In, Tf, Bf);
-        Log.d("xxxxxxxxxxxxxxx 2", "Test Tf:  x=" + Tf.x + ", y=" + Tf.y);
         Get_Horizontal_Line(In, Lf, Rf);
 
         return Get_Intersection_Of_Two_Line_A_And_B(new Point(Lf.ToPoint()), new Point(Rf.ToPoint()), new Point(Bf.ToPoint()), new Point(Tf.ToPoint()));
-    }
-
-    private class Horizontal_Line {
-
-        public double Lfx;
-        public double Lfy;
-        public double Rfx;
-        public double Rfy;
-
-        public Horizontal_Line(double _Lfx, double _Lfy, double _Rfx, double _Rfy) {
-            this.Lfx = _Lfx;
-            this.Lfy = _Lfy;
-            this.Rfx = _Rfx;
-            this.Rfy = _Rfy;
-        }
     }
 
     private void Get_Horizontal_Line(PointD _In, PointD Lf, PointD Rf) {
@@ -926,8 +899,13 @@ public class Class_OMR {
         Rl = In.y;
         Rm = Def_BR.y - Def_TR.y - Rl;
 
-        Lf = Section_Formula(new PointD(BL), new PointD(TL), Ll, Lm);
-        Rf = Section_Formula(new PointD(BR), new PointD(TR), Rl, Rm);
+        PointD _Lf = Section_Formula(new PointD(BL), new PointD(TL), Ll, Lm);
+        Lf.x = _Lf.x;
+        Lf.y = _Lf.y;
+
+        PointD _Rf = Section_Formula(new PointD(BR), new PointD(TR), Rl, Rm);
+        Rf.x = _Rf.x;
+        Rf.y = _Rf.y;
     }
 
     private void Get_Vertical_Line(PointD _In, PointD Tf, PointD Bf) {
@@ -1024,14 +1002,14 @@ public class Class_OMR {
         Calculate_Side_Length_And_Ratio();
     }
 
-    public void Set_Alignment(PointD In_TL, PointD In_TR, PointD In_BL, PointD In_BR, int Ans_Sheet_Type) {
+    public void Set_Alignment(PointD _In_TL, PointD _In_TR, PointD _In_BL, PointD _In_BR, int Ans_Sheet_Type) {
 
         Load_Alignment(Ans_Sheet_Type);
 
-        TL = new PointD(In_TL);
-        TR = new PointD(In_TR);
-        BL = new PointD(In_BL);
-        BR = new PointD(In_BR);
+        TL = new PointD(_In_TL);
+        TR = new PointD(_In_TR);
+        BL = new PointD(_In_BL);
+        BR = new PointD(_In_BR);
 
         Calculate_Side_Length_And_Ratio();
     }
@@ -1082,12 +1060,17 @@ public class Class_OMR {
         double Ll; //Section Formula ' l ' at Left
         double Lm; //Section Formula ' m ' at Left
 
-        Rf = new PointD(Get_Right_Point(In.y));
+        PointD _Rf = new PointD(Get_Right_Point(In.y));
+        Rf.x = _Rf.x;
+        Rf.y = _Rf.y;
 
         Ll = Rf.y - BR.y;
         Lm = TR.y - Rf.y;
 
-        Lf = Section_Formula(new PointD(BL), new PointD(TL), Ll, Lm);
+        PointD _Lf = Section_Formula(new PointD(BL), new PointD(TL), Ll, Lm);
+        Lf.x = _Lf.x;
+        Lf.y = _Lf.y;
+
     }
 
     private Point Get_Right_Point(double In_y) {
@@ -1195,8 +1178,6 @@ public class Class_OMR {
     private double GetBrightness(int color) {
         float[] hsl = new float[3];
         ColorUtils.colorToHSL(color, hsl);
-        //double tst = (double) hsl[2];
-        //Log.d("xxxxxxxxxxxxxxx", "Test:  " + hsl[0] + ", " + hsl[1] + ", " + hsl[2] + ", " + tst);
         return (double) hsl[2];
     }
 
@@ -1248,8 +1229,6 @@ public class Class_OMR {
         Omr_Bubble_Width = (int) java.lang.Math.round(Bubble_Width * Ratio.x);
         Omr_Bubble_Height = (int) java.lang.Math.round(Bubble_Height * Ratio.y);
 
-        Log.d("xxxxxxxxxxxxxxx", "Test:  " +  A.x + ", " + Squ_Thick);
-
         for (x = A.x - (Squ_Thick / 2); x <= (A.x + (Squ_Thick / 2)); x++) {
             for (y = (A.y - (Squ_Thick / 2)); y <= (A.y + (Squ_Thick / 2)); y++) {
                 Tot_Bri += GetBrightness(BmOmr.getPixel(x, y));
@@ -1278,7 +1257,6 @@ public class Class_OMR {
         for (i = 1; i <= Bottom_Ali_Points_Cnt; i++) {
             A = Get_Bottom_Ali_Point_Def(i);
             A = Get_Point(new PointD(A));
-            Log.d("xxxxxxxxxxxxxxx", "Test:  x = " + A.x + ", y=" + A.y);
             ret = Get_Ali_Rotation_Mark(BmOmr, A);
             if (ret.Ali_Rotation_Mark == false) break;
         }
@@ -1703,8 +1681,8 @@ public class Class_OMR {
                 }
             }
 
-            Right_Ali = Get_Right_Ali_Positions(BmOmr, Ans_Sheet_Type);
-            Bottom_Ali = Get_Bottom_Ali_Positions(BmOmr, Ans_Sheet_Type);
+            Right_Ali = Get_Right_Ali_Positions(BmOmr);
+            Bottom_Ali = Get_Bottom_Ali_Positions(BmOmr);
 
             if (Right_Ali && Bottom_Ali) {
                 ret = true;
@@ -1727,7 +1705,7 @@ public class Class_OMR {
         }
     }
 
-    private boolean Get_Right_Ali_Positions(Bitmap BmOmr, int Ans_Sheet_Type) {
+    private boolean Get_Right_Ali_Positions(Bitmap BmOmr) {
 
         int Point_Num;
         Point A = new Point(0, 0);
@@ -1745,7 +1723,7 @@ public class Class_OMR {
 
             A = Get_Right_Ali_Point_Def(Point_Num);
             A = Get_Point(new PointD(A));
-            Get_Right_Ali_Search_Area(A, BmOmr.getHeight(), BmOmr.getWidth(), Left, Right, Top, Bottom, Vert_Squ_Thick_Max, Vert_Squ_Thick_Min, Vert_Blank_Space, Ans_Sheet_Type);
+            Get_Right_Ali_Search_Area(A, BmOmr.getHeight(), BmOmr.getWidth(), Left, Right, Top, Bottom, Vert_Squ_Thick_Max, Vert_Squ_Thick_Min, Vert_Blank_Space);
 
             //Call Draw_Rectangle(BmOmr, Left_x, Right_x, Top_y, Bottom_y)
 
@@ -1771,8 +1749,7 @@ public class Class_OMR {
                                            Point Bottom,
                                            Point Vert_Squ_Thick_Max,
                                            Point Vert_Squ_Thick_Min,
-                                           Point Vert_Blank_Space,
-                                           int Ans_Sheet_Type) {
+                                           Point Vert_Blank_Space) {
 
         Point A = new Point(_A);
         Sheet_Hight -= 1;
@@ -1799,7 +1776,7 @@ public class Class_OMR {
         Vert_Squ_Thick_Min.y = (int) java.lang.Math.round(YRatio_Right * Squ_Thick * Squ_Thick_Min / 100);
     }
 
-    private boolean Get_Bottom_Ali_Positions(Bitmap BmOmr, int Ans_Sheet_Type) {
+    private boolean Get_Bottom_Ali_Positions(Bitmap BmOmr) {
 
         int Point_Num;
         Point A = new Point(0, 0);
@@ -1949,6 +1926,7 @@ public class Class_OMR {
     */
     //endregion
 
+    //region Image Create
     /*
     Public Function Get_Omr_Ans_Sheet(ByVal Ans_Sheet_Code As Integer) As Bitmap
 
@@ -2455,11 +2433,15 @@ public class Class_OMR {
 
     End Sub
     */
+    //endregion
 
-    public void Get_All_Bubble_Mark(int Tot_Question, Bitmap BmOmr, boolean[][] Digit_Mark, boolean[][] Answer_Mark) {
+    public void Get_All_Bubble_Mark(int Tot_Question,
+                                     Bitmap BmOmr,
+                                     boolean[][] Digit_Mark,
+                                     boolean[][] Answer_Mark) {
 
         double[][] Digit_Bri = new double[5][11]; //Digit Place, Digit Count
-        double[][] Answer_Bri = new double[0][0]; //Tot Qu, Choice
+        double[][] Answer_Bri = new double[Tot_Question + 1][6]; //Tot Qu, Choice
         double Brightness_Level;
         int Digit_Place;
         int Digit_Cnt;
@@ -2467,8 +2449,6 @@ public class Class_OMR {
         int Choice;
 
         Brightness_Level = Get_All_Bubble_Brightness(Tot_Question, BmOmr, Digit_Bri, Answer_Bri);
-
-        Answer_Mark = new boolean[Tot_Question + 1][6];
 
         for (Digit_Place = 1; Digit_Place <= 4; Digit_Place++) {
             for (Digit_Cnt = 1; Digit_Cnt <= 10; Digit_Cnt++) {
@@ -2478,7 +2458,6 @@ public class Class_OMR {
                 } else {
                     Digit_Mark[Digit_Place][Digit_Cnt] = false;
                 }
-
             }
         }
 
@@ -2494,7 +2473,10 @@ public class Class_OMR {
         }
     }
 
-    public double Get_All_Bubble_Brightness(int Tot_Question , Bitmap BmOmr, double Digit_Bri[][], double Answer_Bri[][]) {
+    public double Get_All_Bubble_Brightness(int Tot_Question ,
+                                            Bitmap BmOmr,
+                                            double Digit_Bri[][],
+                                            double Answer_Bri[][]) {
 
         int Digit_Place;
         int Digit_Cnt;
@@ -2503,8 +2485,6 @@ public class Class_OMR {
         double Max_Bri = -100;
         double Min_Bri = 100;
         double Brightness_Level;
-
-        Answer_Bri = new double[Tot_Question + 1][6];
 
         for (Digit_Place = 1; Digit_Place <= 4; Digit_Place++) {
             for (Digit_Cnt = 1; Digit_Cnt <= 10; Digit_Cnt++) {

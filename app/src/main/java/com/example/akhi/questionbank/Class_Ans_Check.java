@@ -46,6 +46,9 @@ public class Class_Ans_Check {
             return Ans_Sheet_Result;
         }
 
+        Log.d("AkhilDebug", "Alignment Points:  " + Ali[1] + ", " + Ali[2] + ", " + Ali[3] + ", " + Ali[4] );
+
+        Answer_Mark = new boolean[Tot_Question + 1][6];
         ClsOmr.Get_All_Bubble_Mark(Tot_Question, BmOmr, Digit_Mark, Answer_Mark);
 
         //Get Reg. Num.
