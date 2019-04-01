@@ -46,8 +46,6 @@ public class Class_Ans_Check {
             return Ans_Sheet_Result;
         }
 
-        Log.d("AkhilDebug", "Alignment Points:  " + Ali[1] + ", " + Ali[2] + ", " + Ali[3] + ", " + Ali[4] );
-
         Answer_Mark = new boolean[Tot_Question + 1][6];
         ClsOmr.Get_All_Bubble_Mark(Tot_Question, BmOmr, Digit_Mark, Answer_Mark);
 
@@ -67,7 +65,7 @@ public class Class_Ans_Check {
             }
 
             if (Digit_Mark_Cnt == 1) {
-                Reg_Last_Digits[0] = Reg_Last_Digits[0] + Mark_Digit * (10 ^ (4 - Digit_Place));
+                Reg_Last_Digits[0] = Reg_Last_Digits[0] + Mark_Digit * (int)java.lang.Math.pow(10, (4 - Digit_Place));
             } else {
                 Ans_Sheet_Result = "Reg. Number Error";
                 return Ans_Sheet_Result;

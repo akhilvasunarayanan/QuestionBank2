@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,7 +27,7 @@ public class Evaluate extends AppCompatActivity {
     private Class_OMR ClsOMR = new Class_OMR();
     ImageView imageView;
     private myDbAdapter dbManager;
-    private TextView txtTotalMark, txtAttendedQu, txtRightAns;
+    private TextView txtTotalMark, txtAttendedQu, txtRightAns, txtRegNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,15 +36,26 @@ public class Evaluate extends AppCompatActivity {
 
         imageView = (ImageView) this.findViewById(R.id.imageView1);
         Button photoButton = (Button) this.findViewById(R.id.btnCapture);
+        Button btnSelect = (Button) this.findViewById(R.id.btnEvaluateSelect);
+
+        txtRegNo = (EditText)this.findViewById(R.id.editTextEvaluateRegNo);
+        txtTotalMark = (EditText)this.findViewById(R.id.editTextEvaluateTotalMark);
+        txtAttendedQu = (EditText)this.findViewById(R.id.editTextEvaluateAttended);
+        txtRightAns = (EditText)this.findViewById(R.id.editTextEvaluateRight);
 
         photoButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                //Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                //startActivityForResult(cameraIntent, CAMERA_REQUEST);
-                int PICK_IMAGE = 1;
+                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            }
+        });
 
+        btnSelect.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -91,10 +103,12 @@ public class Evaluate extends AppCompatActivity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         if (requestCode == CAMERA_REQUEST) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             EvaluateAnswerSheet(photo);
-            //imageView.setImageBitmap(photo);
+            imageView.setImageBitmap(photo);
+            EvaluateAnswerSheet(photo);
         }
 
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
@@ -103,7 +117,6 @@ public class Evaluate extends AppCompatActivity {
 
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
 
                 imageView.setImageBitmap(bitmap);
                 EvaluateAnswerSheet(bitmap);
@@ -122,7 +135,11 @@ public class Evaluate extends AppCompatActivity {
         boolean[] reCheck = new boolean[1];
 
         ClsAns.Get_Ans_Sheet_Result(bmOmr, ClsOMR, regNo, attentedQu, rightAns, totalMark, reCheck, answerSheetId);
+        txtRegNo.setText(Integer.toString(regNo[0]));
+        txtTotalMark.setText(Double.toString(totalMark[0]));
+        txtAttendedQu.setText(Integer.toString(attentedQu[0]));
+        txtRightAns.setText(Integer.toString(rightAns[0]));
 
-        Log.d("xxxxxxxxxxxxx", "Reg: " + regNo[0]);
+        Log.d("AkhilDebug", "Reg: " + regNo[0] + ", Attended=" + attentedQu[0] + ", Right=" + rightAns[0] + ", Total=" + totalMark[0]);
     }
 }

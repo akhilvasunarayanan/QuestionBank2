@@ -120,6 +120,12 @@ public class Class_OMR {
         public Point ToPoint() {
             return new Point((int) java.lang.Math.round(x), (int) java.lang.Math.round(y));
         }
+
+        @Override
+        public String toString() {
+            return "Point(" + x + ", " + y + ")";
+        }
+
     }
 
     public void Load_Alignment(int Ans_Sheet_Type) {
@@ -1086,6 +1092,7 @@ public class Class_OMR {
 
         Bottom.x = (int) java.lang.Math.round(Def_BR.x - Def_BL.x);
         Bottom.y = 0;
+
         Act_Bottom.x = (int) java.lang.Math.round(BR.x);
         Act_Bottom.y = (int) java.lang.Math.round(BR.y);
         Find_Ok = false;
@@ -1093,6 +1100,7 @@ public class Class_OMR {
         for (i = 1; i <= Right_Ali_Points_Cnt; i++) {
 
             Top = Get_Right_Ali_Point_Def(i);
+
             Act_Top.x = Right_Ali[i].x;
             Act_Top.y = Right_Ali[i].y;
 
@@ -1126,7 +1134,8 @@ public class Class_OMR {
 
         Bubble = Get_RollNumber_Bubble(Digit_Cnt, Digit_Place);
 
-        return Get_Bubble_Mark_Brightness(BmOmr, Bubble);
+        double bri = Get_Bubble_Mark_Brightness(BmOmr, Bubble);
+        return bri;
     }
 
     public Point Get_RollNumber_Bubble(int Digit_Cnt, int Digit_Place) {
@@ -1727,7 +1736,9 @@ public class Class_OMR {
 
             //Call Draw_Rectangle(BmOmr, Left_x, Right_x, Top_y, Bottom_y)
 
+            Ali.set(Ali.y, Ali.x);
             ret = Get_Alignment_Point(BmOmr, true, new Point(Vert_Blank_Space.y, Vert_Blank_Space.x), new Point(Vert_Squ_Thick_Max.y, Vert_Squ_Thick_Max.x), new Point(Vert_Squ_Thick_Min.y, Vert_Squ_Thick_Min.x), Top.y, Bottom.y, Left.x, Right.x, Ali);
+            Ali.set(Ali.y, Ali.x);
 
             Right_Ali[Point_Num].x = Ali.x;
             Right_Ali[Point_Num].y = Ali.y;
