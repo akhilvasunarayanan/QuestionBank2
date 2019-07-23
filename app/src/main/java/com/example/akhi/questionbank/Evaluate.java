@@ -51,7 +51,7 @@ public class Evaluate extends AppCompatActivity {
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
             }
         });
-
+ 
         btnSelect.setOnClickListener(new View.OnClickListener() {
 
             @Override
